@@ -1,14 +1,14 @@
 import 'fc_native_video_thumbnail_platform_interface.dart';
 
 class FcNativeVideoThumbnail {
-  /// Gets a thumbnail from [srcFile] with the given parameters and saves it to [destFile].
-  /// [srcFile] source image path.
-  /// [destFile] destination image path.
-  /// [width] and [height] max dimensions of generated thumbnail image.
+  /// Gets a thumbnail from [srcFile] with the given options and saves it to [destFile].
+  /// [srcFile] source video path.
+  /// [destFile] destination thumbnail path.
+  /// [width] / [height] max dimensions of the destination thumbnail.
   /// NOTE: Windows doesn't support non-square thumbnail images, only [width] is used in Windows, resulting in a [width]x[width] thumbnail.
-  /// [keepAspectRatio] if true, keeps aspect ratio.
+  /// [keepAspectRatio] if true, keeps aspect ratio of the destination thumbnail.
   /// NOTE: iOS/macOS only. Defaults to true on other platforms.
-  /// [type] specifies image type of destination file. 'png' or 'jpeg'.
+  /// [type] specifies the image type of the destination thumbnail. 'png' or 'jpeg'.
   /// [quality] only applies to 'jpeg' type. 1-100 (100 best quality).
   Future<void> getThumbnailFile(
       {required String srcFile,
