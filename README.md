@@ -2,8 +2,6 @@
 
 # fc_native_video_thumbnail
 
-**Android support is WIP.**
-
 A Flutter plugin for getting video thumbnails via native APIs.
 
 | iOS | Android | macOS | Windows |
