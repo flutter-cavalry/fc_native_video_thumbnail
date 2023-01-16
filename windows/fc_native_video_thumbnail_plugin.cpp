@@ -95,7 +95,7 @@ int SaveThumbnail(PCWSTR srcFile, PCWSTR destFile, int size, REFGUID type) {
     ISharedBitmap* pSharedBitmap = NULL;
     hr = pThumbCache->GetThumbnail(pSI,
         size,
-        WTS_EXTRACT,
+        WTS_EXTRACT | WTS_SCALETOREQUESTEDSIZE,
         &pSharedBitmap,
         NULL,
         NULL);
