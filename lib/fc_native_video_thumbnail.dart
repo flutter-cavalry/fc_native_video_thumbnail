@@ -17,7 +17,7 @@ class FcNativeVideoThumbnail {
       required int height,
       required bool keepAspectRatio,
       required String type,
-      double? quality}) {
+      int? quality}) {
     return FcNativeVideoThumbnailPlatform.instance.getThumbnailFile(
         srcFile: srcFile,
         destFile: destFile,

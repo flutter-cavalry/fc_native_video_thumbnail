@@ -18,7 +18,7 @@ class MethodChannelFcNativeVideoThumbnail
       required int height,
       required bool keepAspectRatio,
       required String type,
-      double? quality}) async {
+      int? quality}) async {
     await methodChannel.invokeMethod<void>('getThumbnailFile', {
       'srcFile': srcFile,
       'destFile': destFile,

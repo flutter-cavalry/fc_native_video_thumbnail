@@ -31,7 +31,7 @@ abstract class FcNativeVideoThumbnailPlatform extends PlatformInterface {
       required int height,
       required bool keepAspectRatio,
       required String type,
-      double? quality}) {
+      int? quality}) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 }
