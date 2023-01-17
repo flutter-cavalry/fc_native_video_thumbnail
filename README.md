@@ -22,7 +22,7 @@ A Flutter plugin for creating video thumbnails via native APIs.
   /// NOTE: iOS/macOS only. Defaults to true on other platforms.
   /// [type] specifies the image type of the destination thumbnail. 'png' or 'jpeg'.
   /// [quality] only applies to 'jpeg' type. 1-100 (100 best quality).
-  await plugin.getThumbnailFile(
+  await plugin.getVideoThumbnail(
             srcFile: srcFile,
             destFile: destFile,
             width: 300,

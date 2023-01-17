@@ -16,7 +16,7 @@ final _plugin = FcNativeVideoThumbnail();
 /// [keepAspectRatio] if true, keeps aspect ratio.
 /// [type] specifies image type of destination file. 'png' or 'jpeg'.
 /// [quality] only applies for 'jpeg' type, 1-100 (100 best quality).
-await _plugin.getThumbnailFile(
+await _plugin.getVideoThumbnail(
           srcFile: srcFile,
           destFile: destFile,
           width: 300,

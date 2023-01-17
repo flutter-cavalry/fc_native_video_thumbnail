@@ -14,7 +14,7 @@ public class SwiftFcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
           return
       }
       switch call.method {
-      case "getThumbnailFile":
+      case "getVideoThumbnail":
           // Arguments are enforced on dart side.
           let srcFile = args["srcFile"] as! String
           let destFile = args["destFile"] as! String
@@ -28,7 +28,7 @@ public class SwiftFcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
           
           DispatchQueue.global().async {
               do {
-                  try ImageUtil.getThumbnailFile(src: srcFile, dest: destFile, width: CGFloat(width), height: CGFloat(height), keepAspectRatio: keepAspectRatio, outType: outputType, quality: quality)
+                  try ImageUtil.getVideoThumbnail(src: srcFile, dest: destFile, width: CGFloat(width), height: CGFloat(height), keepAspectRatio: keepAspectRatio, outType: outputType, quality: quality)
                   DispatchQueue.main.async {
                       result(nil)
                   }

@@ -34,7 +34,7 @@ class _MyAppState extends State<MyApp> {
         ),
         body: Center(
           child: _destImg == null
-              ? Text(_err ?? 'Click on the + button to select a photo')
+              ? Text(_err ?? 'Click on the + button to select a video')
               : Column(
                   children: [
                     SelectableText(_destImg!),
@@ -63,7 +63,7 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         _err = null;
       });
-      await _plugin.getThumbnailFile(
+      await _plugin.getVideoThumbnail(
           srcFile: src,
           destFile: dest,
           width: 300,

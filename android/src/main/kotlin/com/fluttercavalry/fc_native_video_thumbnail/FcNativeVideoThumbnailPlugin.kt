@@ -35,7 +35,7 @@ class FcNativeVideoThumbnailPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
     when (call.method) {
-      "getThumbnailFile" -> {
+      "getVideoThumbnail" -> {
         // Arguments are enforced on dart side.
         val srcFile = call.argument<String>("srcFile")!!
         val destFile = call.argument<String>("destFile")!!

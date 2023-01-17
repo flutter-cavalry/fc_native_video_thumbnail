@@ -12,7 +12,7 @@ enum OutputType {
 }
 
 class ImageUtil {
-    static func getThumbnailFile(src: String, dest: String, width: CGFloat, height: CGFloat, keepAspectRatio: Bool, outType: OutputType, quality: Int?) throws {
+    static func getVideoThumbnail(src: String, dest: String, width: CGFloat, height: CGFloat, keepAspectRatio: Bool, outType: OutputType, quality: Int?) throws {
         let asset = AVURLAsset(url: URL(fileURLWithPath: src))
         let imageGenerator = AVAssetImageGenerator(asset: asset)
         imageGenerator.appliesPreferredTrackTransform = true

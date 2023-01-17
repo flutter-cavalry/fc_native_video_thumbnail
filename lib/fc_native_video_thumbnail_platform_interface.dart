@@ -24,7 +24,7 @@ abstract class FcNativeVideoThumbnailPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<void> getThumbnailFile(
+  Future<void> getVideoThumbnail(
       {required String srcFile,
       required String destFile,
       required int width,
