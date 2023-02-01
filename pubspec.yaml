@@ -1,6 +1,6 @@
 name: fc_native_video_thumbnail
 description: A Flutter plugin for creating video thumbnails with native APIs.
-version: 0.3.0
+version: 0.3.1
 homepage: https://github.com/flutter-cavalry/fc_native_video_thumbnail
 
 environment:
