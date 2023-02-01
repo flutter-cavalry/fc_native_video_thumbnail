@@ -13,7 +13,9 @@ A Flutter plugin for creating video thumbnails via native APIs.
 ```dart
   final plugin = FcNativeVideoThumbnail();
 
+  ///
   /// Gets a thumbnail from [srcFile] with the given options and saves it to [destFile].
+  ///
   /// [srcFile] source video path.
   /// [destFile] destination thumbnail path.
   /// [width] / [height] max dimensions of the destination thumbnail.
@@ -29,5 +31,5 @@ A Flutter plugin for creating video thumbnails via native APIs.
             height: 300,
             keepAspectRatio: true,
             type: 'jpeg',
-            quality: 90)
+            quality: 90);
 ```
