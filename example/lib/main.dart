@@ -12,42 +12,50 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: MyHome(),
+    );
+  }
 }
 
-class _MyAppState extends State<MyApp> {
+class MyHome extends StatefulWidget {
+  const MyHome({super.key});
+
+  @override
+  State<MyHome> createState() => _MyHomeState();
+}
+
+class _MyHomeState extends State<MyHome> {
   String? _destImg;
-  String? _err;
   String _imgSizeInfo = '';
   final _plugin = FcNativeVideoThumbnail();
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: Center(
-          child: _destImg == null
-              ? Text(_err ?? 'Click on the + button to select a video')
-              : Column(
-                  children: [
-                    SelectableText(_destImg!),
-                    Text(_imgSizeInfo),
-                    Image(image: FileImage(File(_destImg!)))
-                  ],
-                ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _selectImage,
-          tooltip: 'Select an image',
-          child: const Icon(Icons.add),
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Plugin example app'),
+      ),
+      body: Center(
+        child: _destImg == null
+            ? const Text('Click on the + button to select a video')
+            : Column(
+                children: [
+                  SelectableText(_destImg!),
+                  Text(_imgSizeInfo),
+                  Image(image: FileImage(File(_destImg!)))
+                ],
+              ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _selectImage,
+        tooltip: 'Select an image',
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -60,9 +68,6 @@ class _MyAppState extends State<MyApp> {
       }
       var src = result.files.single.path!;
       var dest = tmpPath() + p.extension(src);
-      setState(() {
-        _err = null;
-      });
       await _plugin.getVideoThumbnail(
           srcFile: src,
           destFile: dest,
@@ -78,9 +83,23 @@ class _MyAppState extends State<MyApp> {
             'Decoded size: ${decodedImage.width}x${decodedImage.height}';
       });
     } catch (err) {
-      setState(() {
-        _err = err.toString();
-      });
+      await _showErrorAlert(context, err.toString());
     }
+  }
+
+  Future<void> _showErrorAlert(BuildContext context, String msg) async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const SelectableText('Error'),
+        content: SelectableText(msg),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 }

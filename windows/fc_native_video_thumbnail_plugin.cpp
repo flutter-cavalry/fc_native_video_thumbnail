@@ -6,6 +6,7 @@
 // For getPlatformVersion; remove unless needed for your plugin implementation.
 #include <VersionHelpers.h>
 #include <atlimage.h>
+#include <comdef.h>
 #include <flutter/method_channel.h>
 #include <flutter/plugin_registrar_windows.h>
 #include <flutter/standard_method_codec.h>
@@ -78,10 +79,28 @@ std::wstring Utf16FromUtf8(const std::string& utf8_string) {
   return utf16_string;
 }
 
-int SaveThumbnail(PCWSTR srcFile, PCWSTR destFile, int size, REFGUID type) {
+std::string HRESULTToString(HRESULT hr) {
+  _com_error error(hr);
+  CString cs;
+  cs.Format(_T("Error 0x%08x: %s"), hr, error.ErrorMessage());
+
+  std::string res;
+
+#ifdef UNICODE
+  int wlen = lstrlenW(cs);
+  int len = WideCharToMultiByte(CP_ACP, 0, cs, wlen, NULL, 0, NULL, NULL);
+  res.resize(len);
+  WideCharToMultiByte(CP_ACP, 0, cs, wlen, &res[0], len, NULL, NULL);
+#else
+  res = errMsg;
+#endif
+  return res;
+}
+
+std::string SaveThumbnail(PCWSTR srcFile, PCWSTR destFile, int size, REFGUID type) {
   IShellItem* pSI;
   HRESULT hr = SHCreateItemFromParsingName(srcFile, NULL, IID_IShellItem, (void**)&pSI);
-  if (!SUCCEEDED(hr)) return 1;
+  if (!SUCCEEDED(hr)) return "`SHCreateItemFromParsingName` failed with " + HRESULTToString(hr);
 
   IThumbnailCache* pThumbCache;
   hr = CoCreateInstance(CLSID_LocalThumbnailCache,
@@ -89,7 +108,7 @@ int SaveThumbnail(PCWSTR srcFile, PCWSTR destFile, int size, REFGUID type) {
                         CLSCTX_INPROC_SERVER,
                         IID_PPV_ARGS(&pThumbCache));
 
-  if (!SUCCEEDED(hr)) return 1;
+  if (!SUCCEEDED(hr)) return "`CoCreateInstance` failed with " + HRESULTToString(hr);
   ISharedBitmap* pSharedBitmap = NULL;
   hr = pThumbCache->GetThumbnail(pSI,
                                  size,
@@ -98,10 +117,10 @@ int SaveThumbnail(PCWSTR srcFile, PCWSTR destFile, int size, REFGUID type) {
                                  NULL,
                                  NULL);
 
-  if (!SUCCEEDED(hr) || !pSharedBitmap) return 1;
+  if (!SUCCEEDED(hr) || !pSharedBitmap) return "`GetThumbnail` failed with " + HRESULTToString(hr);
   HBITMAP hBitmap;
   hr = pSharedBitmap->GetSharedBitmap(&hBitmap);
-  if (!SUCCEEDED(hr) || !hBitmap) return 1;
+  if (!SUCCEEDED(hr) || !hBitmap) return "`GetSharedBitmap` failed with " + HRESULTToString(hr);
 
   pThumbCache->Release();
 
@@ -109,8 +128,8 @@ int SaveThumbnail(PCWSTR srcFile, PCWSTR destFile, int size, REFGUID type) {
   CImage image;
   image.Attach(hBitmap);
   hr = image.Save(destFile, type);
-  if (!SUCCEEDED(hr)) return 1;
-  return 0;
+  if (!SUCCEEDED(hr)) return "`image.Attach` failed with " + HRESULTToString(hr);
+  return "";
 }
 
 // static
@@ -160,10 +179,10 @@ void FcNativeVideoThumbnailPlugin::HandleMethodCall(
         std::get_if<std::string>(ValueOrNull(args, "type"));
     assert(outType);
 
-    auto save_res = SaveThumbnail(Utf16FromUtf8(*src_file).c_str(), Utf16FromUtf8(*dest_file).c_str(), *width, outType->compare("png") == 0 ? Gdiplus::ImageFormatPNG : Gdiplus::ImageFormatJPEG);
+    auto oper_res = SaveThumbnail(Utf16FromUtf8(*src_file).c_str(), Utf16FromUtf8(*dest_file).c_str(), *width, outType->compare("png") == 0 ? Gdiplus::ImageFormatPNG : Gdiplus::ImageFormatJPEG);
 
-    if (save_res) {
-      result->Error("Err", "Operation failed");
+    if (oper_res != "") {
+      result->Error("PluginError", "Operation failed. " + oper_res);
     } else {
       result->Success(flutter::EncodableValue(nullptr));
     }
