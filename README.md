@@ -13,23 +13,22 @@ A Flutter plugin for creating video thumbnails via native APIs.
 ```dart
   final plugin = FcNativeVideoThumbnail();
 
-  ///
   /// Gets a thumbnail from [srcFile] with the given options and saves it to [destFile].
   ///
   /// [srcFile] source video path.
   /// [destFile] destination thumbnail path.
   /// [width] / [height] max dimensions of the destination thumbnail.
-  /// NOTE: Windows doesn't support non-square thumbnail images, only [width] is used in Windows, resulting in a [width]x[width] thumbnail.
+  /// Windows doesn't support non-square thumbnail images, only [width] is used in Windows, resulting in a [width]x[width] thumbnail.
   /// [keepAspectRatio] if true, keeps aspect ratio of the destination thumbnail.
-  /// NOTE: iOS/macOS only. Defaults to true on other platforms.
-  /// [type] specifies the image type of the destination thumbnail. 'png' or 'jpeg'.
-  /// [quality] only applies to 'jpeg' type. 1-100 (100 best quality).
+  /// iOS/macOS only. Defaults to true on other platforms.
+  /// [format] specifies the image format of the destination thumbnail. 'png' or 'jpeg'. Defaults to null(auto).
+  /// [quality] only applies to 'jpeg' format. 1-100 (100 best quality).
   await plugin.getVideoThumbnail(
             srcFile: srcFile,
             destFile: destFile,
             width: 300,
             height: 300,
             keepAspectRatio: true,
-            type: 'jpeg',
+            format: 'jpeg',
             quality: 90);
 ```

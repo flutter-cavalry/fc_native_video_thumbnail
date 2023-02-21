@@ -73,8 +73,7 @@ class _MyHomeState extends State<MyHome> {
           destFile: dest,
           width: 300,
           height: 300,
-          keepAspectRatio: true,
-          type: 'jpeg');
+          keepAspectRatio: true);
       var imageFile = File(dest);
       var decodedImage = await decodeImageFromList(imageFile.readAsBytesSync());
       setState(() {

@@ -17,15 +17,17 @@ class MethodChannelFcNativeVideoThumbnail
       required int width,
       required int height,
       required bool keepAspectRatio,
-      required String type,
+      String? format,
       int? quality}) async {
+    var formatValue =
+        format ?? (srcFile.toLowerCase().endsWith('.png') ? 'png' : 'jpeg');
     await methodChannel.invokeMethod<void>('getVideoThumbnail', {
       'srcFile': srcFile,
       'destFile': destFile,
       'width': width,
       'height': height,
       'keepAspectRatio': keepAspectRatio,
-      'type': type,
+      'type': formatValue,
       'quality': quality,
     });
   }
