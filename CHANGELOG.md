@@ -1,3 +1,7 @@
+## 0.4.0
+
+- Rename `type` to `format`.
+
 ## 0.3.0
 
 - Update to Flutter 3.7.
