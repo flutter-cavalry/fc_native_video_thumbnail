@@ -11,13 +11,14 @@ class FcNativeVideoThumbnail {
   /// iOS/macOS only. Defaults to true on other platforms.
   /// [format] specifies the image format of the destination thumbnail. 'png' or 'jpeg'. Defaults to null(auto).
   /// [quality] only applies to 'jpeg' format. 1-100 (100 best quality).
-  Future<void> getVideoThumbnail(
+  Future<bool> getVideoThumbnail(
       {required String srcFile,
       required String destFile,
       required int width,
       required int height,
       required bool keepAspectRatio,
       String? format,
+      bool? srcFileUri,
       int? quality}) {
     return FcNativeVideoThumbnailPlatform.instance.getVideoThumbnail(
         srcFile: srcFile,
@@ -26,6 +27,7 @@ class FcNativeVideoThumbnail {
         height: height,
         keepAspectRatio: keepAspectRatio,
         format: format,
+        srcFileUri: srcFileUri,
         quality: quality);
   }
 }

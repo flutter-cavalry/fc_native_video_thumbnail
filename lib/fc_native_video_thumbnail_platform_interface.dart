@@ -24,14 +24,15 @@ abstract class FcNativeVideoThumbnailPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<void> getVideoThumbnail(
+  Future<bool> getVideoThumbnail(
       {required String srcFile,
       required String destFile,
       required int width,
       required int height,
       required bool keepAspectRatio,
       String? format,
+      bool? srcFileUri,
       int? quality}) {
-    throw UnimplementedError('platformVersion() has not been implemented.');
+    throw UnimplementedError('getVideoThumbnail() has not been implemented.');
   }
 }

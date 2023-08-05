@@ -11,24 +11,27 @@ class MethodChannelFcNativeVideoThumbnail
   final methodChannel = const MethodChannel('fc_native_video_thumbnail');
 
   @override
-  Future<void> getVideoThumbnail(
+  Future<bool> getVideoThumbnail(
       {required String srcFile,
       required String destFile,
       required int width,
       required int height,
       required bool keepAspectRatio,
       String? format,
+      bool? srcFileUri,
       int? quality}) async {
     var formatValue =
         format ?? (srcFile.toLowerCase().endsWith('.png') ? 'png' : 'jpeg');
-    await methodChannel.invokeMethod<void>('getVideoThumbnail', {
-      'srcFile': srcFile,
-      'destFile': destFile,
-      'width': width,
-      'height': height,
-      'keepAspectRatio': keepAspectRatio,
-      'type': formatValue,
-      'quality': quality,
-    });
+    return (await methodChannel.invokeMethod<bool?>('getVideoThumbnail', {
+          'srcFile': srcFile,
+          'srcFileUri': srcFileUri,
+          'destFile': destFile,
+          'width': width,
+          'height': height,
+          'keepAspectRatio': keepAspectRatio,
+          'type': formatValue,
+          'quality': quality,
+        })) ??
+        false;
   }
 }

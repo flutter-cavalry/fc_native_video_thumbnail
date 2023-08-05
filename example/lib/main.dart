@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:fc_native_video_thumbnail/fc_native_video_thumbnail.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -53,27 +53,31 @@ class _MyHomeState extends State<MyHome> {
               ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _selectImage,
+        onPressed: _selectVideo,
         tooltip: 'Select an image',
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  Future<void> _selectImage() async {
+  Future<void> _selectVideo() async {
     try {
-      var result = await FilePicker.platform.pickFiles();
-      if (result == null) {
+      var src = await openFile();
+      if (src == null) {
         return;
       }
-      var src = result.files.single.path!;
-      var dest = tmpPath() + p.extension(src);
-      await _plugin.getVideoThumbnail(
-          srcFile: src,
+      var dest = tmpPath() + p.extension(src.name);
+      final hasThumbnail = await _plugin.getVideoThumbnail(
+          srcFile: src.path,
           destFile: dest,
           width: 300,
           height: 300,
+          srcFileUri: Platform.isAndroid,
           keepAspectRatio: true);
+      if (!hasThumbnail) {
+        await _showErrorAlert(context, 'No thumbnail generated');
+        return;
+      }
       var imageFile = File(dest);
       var decodedImage = await decodeImageFromList(imageFile.readAsBytesSync());
       setState(() {
