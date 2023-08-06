@@ -17,15 +17,15 @@ final plugin = FcNativeVideoThumbnail();
 try {
   /// Gets a thumbnail from [srcFile] with the given options and saves it to [destFile].
   ///
-  /// [srcFile] source video path or Uri (Android only, set [srcFileUri] to true if this is a Uri).
-  /// [srcFileUri] if true, [srcFile] is a Uri, otherwise it's a file path. Defaults to false. Android only.
+  /// [srcFile] source video path or Uri (Only Android supports Uri).
+  /// [srcFileUri] (Android only) if true, [srcFile] is a Uri.
   /// [destFile] destination thumbnail path.
   /// [width] / [height] max dimensions of the destination thumbnail.
   /// Windows doesn't support non-square thumbnail images, only [width] is used in Windows, resulting in a [width]x[width] thumbnail.
-  /// [keepAspectRatio] if true, keeps aspect ratio of the destination thumbnail.
-  /// iOS/macOS only. Defaults to true on other platforms.
+  /// [keepAspectRatio] (iOS/macOS only) if true, keeps aspect ratio of the destination thumbnail.
+  /// Defaults to true on other platforms.
   /// [format] specifies the image format of the destination thumbnail. 'png' or 'jpeg'. Defaults to null(auto).
-  /// [quality] only applies to 'jpeg' format. 1-100 (100 best quality).
+  /// [quality] only applies to 'jpeg' format. 1-100 (100 best quality). For 'png' the quality is always 100 (lossless PNG).
   final thumbnailGenerated = await plugin.getVideoThumbnail(
             srcFile: srcFile,
             destFile: destFile,
