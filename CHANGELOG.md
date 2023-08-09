@@ -1,3 +1,7 @@
+## 0.5.2
+
+- Fix various issues on example project.
+
 ## 0.5.0
 
 - Add support for Android Uri.

@@ -12,6 +12,8 @@ class FcNativeVideoThumbnail {
   /// Defaults to true on other platforms.
   /// [format] specifies the image format of the destination thumbnail. 'png' or 'jpeg'. Defaults to null(auto).
   /// [quality] only applies to 'jpeg' format. 1-100 (100 best quality). For 'png' the quality is always 100 (lossless PNG).
+  /// 
+  /// Returns if the thumbnail was successfully created.
   Future<bool> getVideoThumbnail(
       {required String srcFile,
       required String destFile,
