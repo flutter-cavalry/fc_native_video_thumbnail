@@ -184,7 +184,7 @@ void FcNativeVideoThumbnailPlugin::HandleMethodCall(
     if (oper_res != "") {
       result->Error("PluginError", "Operation failed. " + oper_res);
     } else {
-      result->Success(flutter::EncodableValue(nullptr));
+      result->Success(flutter::EncodableValue(true));
     }
   } else {
     result->NotImplemented();
