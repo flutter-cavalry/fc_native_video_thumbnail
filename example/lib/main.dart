@@ -62,7 +62,12 @@ class _MyHomeState extends State<MyHome> {
 
   Future<void> _selectVideo() async {
     try {
-      var src = await openFile();
+      final List<XTypeGroup> acceptedTypeGroups = Platform.isIOS
+          ? [
+              const XTypeGroup(uniformTypeIdentifiers: ['public.item'])
+            ]
+          : [];
+      var src = await openFile(acceptedTypeGroups: acceptedTypeGroups);
       if (src == null) {
         return;
       }

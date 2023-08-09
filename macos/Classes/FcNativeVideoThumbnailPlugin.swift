@@ -30,7 +30,7 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
         do {
           try ImageUtil.getVideoThumbnail(src: srcFile, dest: destFile, width: CGFloat(width), height: CGFloat(height), keepAspectRatio: keepAspectRatio, outType: outputType, quality: quality)
           DispatchQueue.main.async {
-            result(nil)
+            result(true)
           }
         } catch ResizeError.invalidSrc {
           DispatchQueue.main.async {
