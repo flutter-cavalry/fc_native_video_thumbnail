@@ -1,10 +1,6 @@
 #include "fc_native_video_thumbnail_plugin.h"
 
 // This must be included before many other Windows headers.
-#include <windows.h>
-
-// For getPlatformVersion; remove unless needed for your plugin implementation.
-#include <VersionHelpers.h>
 #include <atlimage.h>
 #include <comdef.h>
 #include <flutter/method_channel.h>
@@ -15,6 +11,7 @@
 #include <shlwapi.h>
 #include <thumbcache.h>
 #include <wincodec.h>
+#include <windows.h>
 #include <wingdi.h>
 
 #include <codecvt>
