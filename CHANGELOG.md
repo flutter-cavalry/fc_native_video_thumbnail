@@ -1,3 +1,7 @@
+## 0.6.0
+
+- Use a shared project between iOS and macOS.
+
 ## 0.5.2
 
 - Fix various issues on example project.
