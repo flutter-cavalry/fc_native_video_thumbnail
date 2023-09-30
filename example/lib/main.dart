@@ -54,7 +54,7 @@ class _MyHomeState extends State<MyHome> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _selectVideo,
-        tooltip: 'Select an image',
+        tooltip: 'Select an video',
         child: const Icon(Icons.add),
       ),
     );

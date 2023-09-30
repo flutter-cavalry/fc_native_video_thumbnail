@@ -39,8 +39,10 @@ flutter:
         pluginClass: FcNativeVideoThumbnailPlugin
       ios:
         pluginClass: FcNativeVideoThumbnailPlugin
+        sharedDarwinSource: true
       macos:
         pluginClass: FcNativeVideoThumbnailPlugin
+        sharedDarwinSource: true
       windows:
         pluginClass: FcNativeVideoThumbnailPluginCApi
 
