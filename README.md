@@ -1,6 +1,6 @@
-[![pub package](https://img.shields.io/pub/v/fc_native_video_thumbnail.svg)](https://pub.dev/packages/fc_native_video_thumbnail)
-
 # fc_native_video_thumbnail
+
+[![pub package](https://img.shields.io/pub/v/fc_native_video_thumbnail.svg)](https://pub.dev/packages/fc_native_video_thumbnail)
 
 A Flutter plugin for creating video thumbnails via native APIs.
 
