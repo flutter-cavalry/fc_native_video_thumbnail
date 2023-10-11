@@ -1,3 +1,7 @@
+## 0.7.0
+
+- Fix various issues in `FCImage`.
+
 ## 0.6.0
 
 - Use a shared project between iOS and macOS.
