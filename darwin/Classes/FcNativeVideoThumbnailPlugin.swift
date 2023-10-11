@@ -29,6 +29,8 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
       // Arguments are enforced on dart side.
       let srcFile = args["srcFile"] as! String
       let destFile = args["destFile"] as! String
+      let srcUrl = URL(fileURLWithPath: srcFile)
+      let destUrl = URL(fileURLWithPath: destFile)
       let width = args["width"] as! Int
       let height = args["height"] as! Int
       let outputString = args["type"] as! String
@@ -39,7 +41,7 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
       
       DispatchQueue.global().async {
         do {
-          let asset = AVURLAsset(url: URL(fileURLWithPath: srcFile))
+          let asset = AVURLAsset(url: srcUrl)
           let imageGenerator = AVAssetImageGenerator(asset: asset)
           imageGenerator.appliesPreferredTrackTransform = true
           
@@ -56,9 +58,9 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
           
           switch outputType {
           case .jpeg:
-            try img.saveToJPEGFile(dest: destFile, quality: quality)
+            try img.saveToJPEGFile(dest: destUrl, quality: quality)
           case .png:
-            try img.saveToPNGFile(dest: destFile)
+            try img.saveToPNGFile(dest: destUrl)
           }
           
           DispatchQueue.main.async {

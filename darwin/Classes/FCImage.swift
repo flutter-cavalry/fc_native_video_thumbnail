@@ -23,6 +23,12 @@ enum FCImageOutputFormat {
 class FCImage {
   private let image: PlatformImage
   
+  var rawImage: PlatformImage {
+    get {
+      return image
+    }
+  }
+  
   init(image: PlatformImage) {
     self.image = image
   }
@@ -40,8 +46,34 @@ class FCImage {
     image = img
   }
   
+  init?(url: URL) {
+#if os(iOS)
+    guard let img = UIImage(contentsOfFile: url.path) else {
+      return nil
+    }
+#elseif os(macOS)
+    guard let img = NSImage(contentsOf: url) else {
+      return nil
+    }
+#endif
+    image = img
+  }
+  
   func size() -> CGSize {
-    return image.size
+#if os(iOS)
+    guard let cgImage = image.cgImage else{
+      return CGSize()
+    }
+    let width = cgImage.width
+    let height = cgImage.height
+    return CGSize(width: width, height: height)
+#elseif os(macOS)
+    if let rep = image.representations.first{
+      let size = CGSize(width: rep.pixelsWide, height: rep.pixelsHigh)
+      return size
+    }
+    return CGSize()
+#endif
   }
   
   func resized(to: CGSize, keepAspectRatio: Bool) -> FCImage {
@@ -59,27 +91,34 @@ class FCImage {
 #endif
   }
   
-  func saveToJPEGFile(dest: String, quality: Int?) throws {
+  func saveToJPEGFile(dest: URL, quality: Int?) throws {
 #if os(iOS)
     let data = image.jpegData(compressionQuality: Double(quality ?? 90) / 100.0)
 #elseif os(macOS)
     let data = image.nsImageToData(type: .jpeg, quality: quality)
 #endif
-    try data?.write(to: URL(fileURLWithPath: dest))
+    try data?.write(to: dest)
   }
   
-  func saveToPNGFile(dest: String) throws {
+  func saveToPNGFile(dest: URL) throws {
 #if os(iOS)
     let data = image.pngData()
 #elseif os(macOS)
     let data = image.nsImageToData(type: .png, quality: nil)
 #endif
-    try data?.write(to: URL(fileURLWithPath: dest))
+    try data?.write(to: dest)
   }
   
   private func coerceSize(targetSize: CGSize) -> CGSize {
-    let ratio = min(targetSize.width / size().width, targetSize.height / size().height)
-    return CGSize(width: floor(size().width * ratio), height: floor(size().height * ratio))
+    var ratio: Double = 0
+    if targetSize.width != 0 && targetSize.height != 0 {
+      ratio = min(targetSize.width / size().width, targetSize.height / size().height)
+    } else if targetSize.width != 0 {
+      ratio = targetSize.width / size().width
+    } else {
+      ratio = targetSize.height / size().height
+    }
+    return CGSize(width: ceil(size().width * ratio), height: ceil(size().height * ratio))
   }
 }
 
