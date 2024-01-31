@@ -1,3 +1,7 @@
+## 0.8.0
+
+- Fix aspect issues on iOS.
+
 ## 0.7.0
 
 - Fix various issues in `FCImage`.
