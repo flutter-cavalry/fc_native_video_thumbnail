@@ -22,6 +22,9 @@ class MethodChannelFcNativeVideoThumbnail
       int? quality}) async {
     var formatValue =
         format ?? (srcFile.toLowerCase().endsWith('.png') ? 'png' : 'jpeg');
+    if (width <= 0 && height <= 0) {
+      throw ArgumentError('Invalid width and height');
+    }
     return (await methodChannel.invokeMethod<bool?>('getVideoThumbnail', {
           'srcFile': srcFile,
           'srcFileUri': srcFileUri,
