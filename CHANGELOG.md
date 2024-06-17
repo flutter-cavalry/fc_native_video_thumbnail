@@ -1,3 +1,7 @@
+## 0.9.0
+
+- Allow resizing with only width or height.
+
 ## 0.8.0
 
 - Fix aspect issues on iOS.
