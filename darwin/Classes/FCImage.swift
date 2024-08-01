@@ -137,6 +137,11 @@ extension UIImage {
         insideRect: .init(origin: .zero, size: newSize)
       )
       targetSize = availableRect.size
+      
+      // Prevent upscaling.
+      if targetSize.width > self.size.width && targetSize.height > self.size.height {
+        targetSize = self.size
+      }
     }
     
     let format = UIGraphicsImageRendererFormat()
@@ -163,6 +168,11 @@ extension NSImage {
         insideRect: .init(origin: .zero, size: newSize)
       )
       targetSize = availableRect.size
+      
+      // Prevent upscaling.
+      if targetSize.width > self.size.width && targetSize.height > self.size.height {
+        targetSize = self.size
+      }
     }
     let scale = NSScreen.main?.backingScaleFactor ?? 1.0
     targetSize = CGSize(width: targetSize.width / scale, height: targetSize.height / scale)
