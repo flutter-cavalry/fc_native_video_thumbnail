@@ -53,11 +53,16 @@ class Task {
           height: height,
           srcFileUri: isSrcUri,
           format: 'jpeg');
-      this.destFile = destFile;
-      var imageFile = File(destFile);
-      var decodedImage = await decodeImageFromList(imageFile.readAsBytesSync());
-      destImgSize =
-          'Decoded size: ${decodedImage.width}x${decodedImage.height}';
+      if (await File(destFile).exists()) {
+        var imageFile = File(destFile);
+        var decodedImage =
+            await decodeImageFromList(imageFile.readAsBytesSync());
+        destImgSize =
+            'Decoded size: ${decodedImage.width}x${decodedImage.height}';
+        this.destFile = destFile;
+      } else {
+        error = 'No thumbnail extracted';
+      }
     } catch (err) {
       error = err.toString();
     }

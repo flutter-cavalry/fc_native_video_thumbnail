@@ -21,6 +21,8 @@
 #include <sstream>
 #include <string>
 
+const std::string kGetThumbnailFailedExtraction = "Failed extraction";
+
 namespace fc_native_video_thumbnail {
 
 // https://github.com/flutter/plugins/blob/main/packages/camera/camera_windows/windows/camera_plugin.cpp
@@ -97,7 +99,9 @@ std::string HRESULTToString(HRESULT hr) {
 std::string SaveThumbnail(PCWSTR srcFile, PCWSTR destFile, int size, REFGUID type) {
   IShellItem* pSI;
   HRESULT hr = SHCreateItemFromParsingName(srcFile, NULL, IID_IShellItem, (void**)&pSI);
-  if (!SUCCEEDED(hr)) return "`SHCreateItemFromParsingName` failed with " + HRESULTToString(hr);
+  if (!SUCCEEDED(hr)) {
+    return "`SHCreateItemFromParsingName` failed with " + HRESULTToString(hr);
+  }
 
   IThumbnailCache* pThumbCache;
   hr = CoCreateInstance(CLSID_LocalThumbnailCache,
@@ -105,7 +109,9 @@ std::string SaveThumbnail(PCWSTR srcFile, PCWSTR destFile, int size, REFGUID typ
                         CLSCTX_INPROC_SERVER,
                         IID_PPV_ARGS(&pThumbCache));
 
-  if (!SUCCEEDED(hr)) return "`CoCreateInstance` failed with " + HRESULTToString(hr);
+  if (!SUCCEEDED(hr)) {
+    return "`CoCreateInstance` failed with " + HRESULTToString(hr);
+  }
   ISharedBitmap* pSharedBitmap = NULL;
   hr = pThumbCache->GetThumbnail(pSI,
                                  size,
@@ -114,10 +120,19 @@ std::string SaveThumbnail(PCWSTR srcFile, PCWSTR destFile, int size, REFGUID typ
                                  NULL,
                                  NULL);
 
-  if (!SUCCEEDED(hr) || !pSharedBitmap) return "`GetThumbnail` failed with " + HRESULTToString(hr);
+  if (!SUCCEEDED(hr) || !pSharedBitmap) {
+    pThumbCache->Release();
+    if (hr == WTS_E_FAILEDEXTRACTION) {
+      return kGetThumbnailFailedExtraction;
+    }
+    return "`GetThumbnail` failed with " + HRESULTToString(hr);
+  }
   HBITMAP hBitmap;
   hr = pSharedBitmap->GetSharedBitmap(&hBitmap);
-  if (!SUCCEEDED(hr) || !hBitmap) return "`GetSharedBitmap` failed with " + HRESULTToString(hr);
+  if (!SUCCEEDED(hr) || !hBitmap) {
+    pThumbCache->Release();
+    return "`GetSharedBitmap` failed with " + HRESULTToString(hr);
+  }
 
   pThumbCache->Release();
 
@@ -125,7 +140,9 @@ std::string SaveThumbnail(PCWSTR srcFile, PCWSTR destFile, int size, REFGUID typ
   CImage image;
   image.Attach(hBitmap);
   hr = image.Save(destFile, type);
-  if (!SUCCEEDED(hr)) return "`image.Attach` failed with " + HRESULTToString(hr);
+  if (!SUCCEEDED(hr)) {
+    return "`image.Attach` failed with " + HRESULTToString(hr);
+  }
   return "";
 }
 
@@ -178,7 +195,9 @@ void FcNativeVideoThumbnailPlugin::HandleMethodCall(
 
     auto oper_res = SaveThumbnail(Utf16FromUtf8(*src_file).c_str(), Utf16FromUtf8(*dest_file).c_str(), *width, outType->compare("png") == 0 ? Gdiplus::ImageFormatPNG : Gdiplus::ImageFormatJPEG);
 
-    if (oper_res != "") {
+    if (oper_res == kGetThumbnailFailedExtraction) {
+      result->Success(flutter::EncodableValue(false));
+    } else if (oper_res != "") {
       result->Error("PluginError", "Operation failed. " + oper_res);
     } else {
       result->Success(flutter::EncodableValue(true));
