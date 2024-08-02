@@ -34,7 +34,6 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
       let width = args["width"] as! Int
       let height = args["height"] as! Int
       let outputString = args["type"] as! String
-      let keepAspectRatio = args["keepAspectRatio"] as! Bool
       
       let quality = args["quality"] as? Int;
       let outputType = outputString == "png" ? FCImageOutputFormat.png : FCImageOutputFormat.jpeg
@@ -54,7 +53,7 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
           let rawImg = NSImage(cgImage: cgImage, size: CGSize(width: cgImage.width, height: cgImage.height))
 #endif
           var img = FCImage(image: rawImg)
-          guard let resized = img.resized(to: CGSize(width: CGFloat(width), height: CGFloat(height)), keepAspectRatio: keepAspectRatio) else {
+          guard let resized = img.resized(to: CGSize(width: CGFloat(width), height: CGFloat(height)), keepAspectRatio: true) else {
             DispatchQueue.main.async {
               result(FlutterError(code: "PluginError", message: "Invalid resize params", details: nil))
             }

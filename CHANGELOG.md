@@ -1,3 +1,8 @@
+## 0.10.0
+
+- Simply API
+- Update Android project
+
 ## 0.9.0
 
 - Allow resizing with only width or height.
