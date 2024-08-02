@@ -29,7 +29,6 @@ abstract class FcNativeVideoThumbnailPlatform extends PlatformInterface {
       required String destFile,
       required int width,
       required int height,
-      required bool keepAspectRatio,
       String? format,
       bool? srcFileUri,
       int? quality}) {

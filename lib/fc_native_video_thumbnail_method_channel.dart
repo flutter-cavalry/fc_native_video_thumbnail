@@ -16,7 +16,6 @@ class MethodChannelFcNativeVideoThumbnail
       required String destFile,
       required int width,
       required int height,
-      required bool keepAspectRatio,
       String? format,
       bool? srcFileUri,
       int? quality}) async {
@@ -31,7 +30,6 @@ class MethodChannelFcNativeVideoThumbnail
           'destFile': destFile,
           'width': width,
           'height': height,
-          'keepAspectRatio': keepAspectRatio,
           'type': formatValue,
           'quality': quality,
         })) ??

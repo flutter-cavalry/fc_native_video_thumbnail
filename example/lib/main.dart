@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:fc_native_video_thumbnail/fc_native_video_thumbnail.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:async';
 
 import 'package:tmp_path/tmp_path.dart';
@@ -28,7 +29,7 @@ class Task {
   final String srcFile;
   final int width;
   final int height;
-  final bool keepAspectRatio;
+  final bool? isSrcUri;
 
   String? destFile;
   String? destImgSize;
@@ -39,7 +40,7 @@ class Task {
       required this.srcFile,
       required this.width,
       required this.height,
-      required this.keepAspectRatio});
+      this.isSrcUri});
 
   Future<void> run() async {
     try {
@@ -50,8 +51,7 @@ class Task {
           destFile: destFile,
           width: width,
           height: height,
-          keepAspectRatio: keepAspectRatio,
-          srcFileUri: Platform.isAndroid,
+          srcFileUri: isSrcUri,
           format: 'jpeg');
       this.destFile = destFile;
       var imageFile = File(destFile);
@@ -140,30 +140,31 @@ class _MyHomeState extends State<MyHome> {
         _tasks.clear();
       });
 
+      final smallVidBytes = await rootBundle.load('res/a.mp4');
+      final smallVidPath = '${tmpPath()}_small.mp4';
+      await File(smallVidPath).writeAsBytes(smallVidBytes.buffer.asUint8List());
+
       _tasks.add(Task(
-          name: 'Resize to 300x300 (keepAspectRatio: true)',
+          name: 'Resize to 300x300',
           srcFile: srcPath,
           width: 300,
-          height: 300,
-          keepAspectRatio: true));
+          height: 300));
+
+      if (Platform.isAndroid) {
+        _tasks.add(Task(
+            name: '(URI) Resize to 300x300',
+            isSrcUri: true,
+            srcFile: srcPath,
+            width: 300,
+            height: 300));
+      }
+
+      // Upscaling task.
       _tasks.add(Task(
-          name: 'Resize to 300x300 (keepAspectRatio: false)',
-          srcFile: srcPath,
-          width: 300,
-          height: 300,
-          keepAspectRatio: false));
-      _tasks.add(Task(
-          name: 'Resize to 300x',
-          srcFile: srcPath,
-          width: 300,
-          height: -1,
-          keepAspectRatio: true));
-      _tasks.add(Task(
-          name: 'Resize to x300',
-          srcFile: srcPath,
-          width: -1,
-          height: 300,
-          keepAspectRatio: true));
+          name: 'No upscaling to 1000x1000',
+          srcFile: smallVidPath,
+          width: 1000,
+          height: 1000));
 
       await Future.forEach(_tasks, (Task task) async {
         await task.run();
