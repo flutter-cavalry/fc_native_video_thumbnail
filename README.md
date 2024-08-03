@@ -7,7 +7,7 @@ A Flutter plugin to create video thumbnails via native APIs.
 |      | iOS | Android | macOS | Windows |
 | ---- | --- | ------- | ----- | ------- |
 | Path | ✅  | ✅      | ✅    | ✅      |
-| Uri  | -   | ✅      | -     | -       |
+| Uri  | ✅  | ✅      | ✅    | -       |
 
 ## Usage
 
