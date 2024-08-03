@@ -29,14 +29,18 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
       // Arguments are enforced on dart side.
       let srcFile = args["srcFile"] as! String
       let destFile = args["destFile"] as! String
-      let srcUrl = URL(fileURLWithPath: srcFile)
-      let destUrl = URL(fileURLWithPath: destFile)
       let width = args["width"] as! Int
       let height = args["height"] as! Int
       let outputString = args["type"] as! String
-      
+      let srcUri = args["srcFileUri"] as? Bool ?? false
       let quality = args["quality"] as? Int;
       let outputType = outputString == "png" ? FCImageOutputFormat.png : FCImageOutputFormat.jpeg
+      
+      guard let srcUrl = srcUri ? URL(string: srcFile) : URL(fileURLWithPath: srcFile) else {
+        result(FlutterError(code: "PluginError", message: "Invalid source URL", details: nil))
+        return
+      }
+      let destUrl = URL(fileURLWithPath: destFile)
       
       DispatchQueue.global().async {
         do {

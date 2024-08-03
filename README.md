@@ -18,7 +18,7 @@ try {
   /// Gets a thumbnail from [srcFile] with the given options and saves it to [destFile].
   ///
   /// [srcFile] source video path or Uri (Only Android supports Uri).
-  /// [srcFileUri] (Android only) if true, [srcFile] is a Uri.
+  /// [srcFileUri] If true, [srcFile] is a Uri (Android/iOS/macOS only).
   /// [destFile] destination thumbnail path.
   /// [width] / [height] max dimensions of the destination thumbnail.
   /// Windows doesn't support non-square thumbnail images, only [width] is used in Windows, resulting in a [width]x[width] max thumbnail.

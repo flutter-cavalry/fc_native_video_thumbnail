@@ -4,6 +4,7 @@ import 'package:fc_native_video_thumbnail/fc_native_video_thumbnail.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:async';
 
 import 'package:tmp_path/tmp_path.dart';
@@ -91,7 +92,17 @@ class _MyHomeState extends State<MyHome> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Click on the + button to select a video'),
+              if (Platform.isAndroid || Platform.isIOS) ...[
+                ElevatedButton(
+                  onPressed: () => _selectVideo(true),
+                  child: const Text('Select video from gallery'),
+                ),
+                const SizedBox(height: 8.0),
+              ],
+              ElevatedButton(
+                onPressed: () => _selectVideo(false),
+                child: const Text('Select video from file'),
+              ),
               const SizedBox(height: 8.0),
               ..._tasks.map((task) {
                 return Column(
@@ -121,26 +132,29 @@ class _MyHomeState extends State<MyHome> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _selectVideo,
-        tooltip: 'Select an video',
-        child: const Icon(Icons.add),
-      ),
     );
   }
 
-  Future<void> _selectVideo() async {
+  Future<void> _selectVideo(bool gallery) async {
     try {
-      final List<XTypeGroup> acceptedTypeGroups = Platform.isIOS
-          ? [
-              const XTypeGroup(uniformTypeIdentifiers: ['public.item'])
-            ]
-          : [];
-      var src = await openFile(acceptedTypeGroups: acceptedTypeGroups);
-      if (src == null) {
-        return;
+      String? srcPath;
+      bool srcUri = false;
+
+      if (!gallery) {
+        var src = await openFile();
+        if (src == null) {
+          return;
+        }
+        srcPath = src.path;
+      } else {
+        final picker = ImagePicker();
+        final xfile = await picker.pickVideo(source: ImageSource.gallery);
+        if (xfile == null) {
+          return;
+        }
+        srcPath = xfile.path;
       }
-      final srcPath = src.path;
+
       setState(() {
         _tasks.clear();
       });
@@ -152,17 +166,9 @@ class _MyHomeState extends State<MyHome> {
       _tasks.add(Task(
           name: 'Resize to 300x300',
           srcFile: srcPath,
+          isSrcUri: srcUri,
           width: 300,
           height: 300));
-
-      if (Platform.isAndroid) {
-        _tasks.add(Task(
-            name: '(URI) Resize to 300x300',
-            isSrcUri: true,
-            srcFile: srcPath,
-            width: 300,
-            height: 300));
-      }
 
       // Upscaling task.
       _tasks.add(Task(
