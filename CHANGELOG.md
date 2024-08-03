@@ -1,3 +1,8 @@
+## 0.11.0
+
+- Support `srcFileUri` on iOS and macOS.
+- Don't throw when `WTS_E_FAILEDEXTRACTION` is returned on Windows.
+
 ## 0.10.0
 
 - Simply API
