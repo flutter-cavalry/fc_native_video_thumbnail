@@ -3,7 +3,7 @@ import 'fc_native_video_thumbnail_platform_interface.dart';
 class FcNativeVideoThumbnail {
   /// Gets a thumbnail from [srcFile] with the given options and saves it to [destFile].
   ///
-  /// [srcFile] source video path or Uri (Only Android supports Uri).
+  /// [srcFile] source video path or Uri (See [srcFileUri]).
   /// [srcFileUri] If true, [srcFile] is a Uri (Android/iOS/macOS only).
   /// [destFile] destination thumbnail path.
   /// [width] / [height] max dimensions of the destination thumbnail.
