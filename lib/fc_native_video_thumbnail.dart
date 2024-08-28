@@ -8,10 +8,11 @@ class FcNativeVideoThumbnail {
   /// [destFile] destination thumbnail path.
   /// [width] / [height] max dimensions of the destination thumbnail.
   /// Windows doesn't support non-square thumbnail images, only [width] is used in Windows, resulting in a [width]x[width] max thumbnail.
-  /// [format] specifies the image format of the destination thumbnail. 'png' or 'jpeg'. Defaults to null(auto).
-  /// [quality] only applies to 'jpeg' format. 1-100 (100 best quality). For 'png' the quality is always 100 (lossless PNG).
+  /// [format] only "jpeg" is supported. Defaults to "jpeg".
+  /// [quality] a fallback value for the quality of the thumbnail image (0-100). May be ignored by the platform.
   ///
-  /// Returns if the thumbnail was successfully created.
+  /// Returns true if thumbnail was successfully created. Or false if thumbnail is not available.
+  /// Throws if error happens during thumbnail generation.
   Future<bool> getVideoThumbnail(
       {required String srcFile,
       required String destFile,
