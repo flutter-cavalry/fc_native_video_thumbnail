@@ -73,8 +73,13 @@ class FcNativeVideoThumbnailPlugin: FlutterPlugin, MethodCallHandler {
           if (srcFileUri) {
             val mmr = MediaMetadataRetriever()
             mmr.setDataSource(mContext, Uri.parse(srcFile))
-            bitmap = mmr.frameAtTime
-          } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && width > 0 && height > 0) {
+            if (Build.VERSION.SDK_INT >= 27) {
+              bitmap = mmr.getScaledFrameAtTime(-1, -1, width, height)
+              scaled = true
+            } else {
+              bitmap = mmr.frameAtTime
+            }
+          } else if (Build.VERSION.SDK_INT >= 29) {
             bitmap = ThumbnailUtils.createVideoThumbnail(File(srcFile), Size(width, height), null)
             scaled = true
           }  else {
