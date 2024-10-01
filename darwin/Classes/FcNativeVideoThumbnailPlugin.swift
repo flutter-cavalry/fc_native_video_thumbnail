@@ -42,45 +42,98 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
       }
       let destUrl = URL(fileURLWithPath: destFile)
       
-      DispatchQueue.global().async {
-        do {
-          let asset = AVURLAsset(url: srcUrl)
-          let imageGenerator = AVAssetImageGenerator(asset: asset)
-          imageGenerator.appliesPreferredTrackTransform = true
-          
-          let cgImage = try imageGenerator.copyCGImage(at: .zero,
-                                                       actualTime: nil)
-          
-#if os(iOS)
-          let rawImg = UIImage(cgImage: cgImage)
-#elseif os(macOS)
-          let rawImg = NSImage(cgImage: cgImage, size: CGSize(width: cgImage.width, height: cgImage.height))
-#endif
-          var img = FCImage(image: rawImg)
-          guard let resized = img.resized(to: CGSize(width: CGFloat(width), height: CGFloat(height)), keepAspectRatio: true) else {
-            DispatchQueue.main.async {
-              result(FlutterError(code: "PluginError", message: "Invalid resize params", details: nil))
+      if #available(macOS 13.0, iOS 16.0, *) {
+        let asset = AVURLAsset(url: srcUrl)
+        let imageGenerator = AVAssetImageGenerator(asset: asset)
+        imageGenerator.appliesPreferredTrackTransform = true
+        let time = CMTimeMakeWithSeconds(Float64(5), preferredTimescale: 100)
+        imageGenerator.generateCGImageAsynchronously(for: time) { cgImage, time, err in
+          do {
+            if let err = err {
+              DispatchQueue.main.async {
+                result(FlutterError(code: "PluginError", message: err.localizedDescription, details: nil))
+              }
+              return
             }
-            return
+            guard let cgImage = cgImage else {
+              DispatchQueue.main.async {
+                result(false)
+              }
+              return
+            }
+#if os(iOS)
+            let rawImg = UIImage(cgImage: cgImage)
+#elseif os(macOS)
+            let rawImg = NSImage(cgImage: cgImage, size: CGSize(width: cgImage.width, height: cgImage.height))
+#endif
+            var img = FCImage(image: rawImg)
+            guard let resized = img.resized(to: CGSize(width: CGFloat(width), height: CGFloat(height)), keepAspectRatio: true) else {
+              DispatchQueue.main.async {
+                result(FlutterError(code: "PluginError", message: "Invalid resize params", details: nil))
+              }
+              return
+            }
+            img = resized
+            
+            switch outputType {
+            case .jpeg:
+              try img.saveToJPEGFile(dest: destUrl, quality: quality)
+            case .png:
+              try img.saveToPNGFile(dest: destUrl)
+            }
+            
+            DispatchQueue.main.async {
+              result(true)
+            }
+          } catch {
+            DispatchQueue.main.async {
+              result(FlutterError(code: "PluginError", message: error.localizedDescription, details: nil))
+            }
           }
-          img = resized
-          
-          switch outputType {
-          case .jpeg:
-            try img.saveToJPEGFile(dest: destUrl, quality: quality)
-          case .png:
-            try img.saveToPNGFile(dest: destUrl)
-          }
-          
-          DispatchQueue.main.async {
-            result(true)
-          }
-        } catch {
-          DispatchQueue.main.async {
-            result(FlutterError(code: "PluginError", message: error.localizedDescription, details: nil))
+        }
+      } else {
+        // Legacy sync implementation.
+        DispatchQueue.global().async {
+          do {
+            let asset = AVURLAsset(url: srcUrl)
+            let imageGenerator = AVAssetImageGenerator(asset: asset)
+            imageGenerator.appliesPreferredTrackTransform = true
+            
+            let cgImage = try imageGenerator.copyCGImage(at: .zero,
+                                                         actualTime: nil)
+            
+  #if os(iOS)
+            let rawImg = UIImage(cgImage: cgImage)
+  #elseif os(macOS)
+            let rawImg = NSImage(cgImage: cgImage, size: CGSize(width: cgImage.width, height: cgImage.height))
+  #endif
+            var img = FCImage(image: rawImg)
+            guard let resized = img.resized(to: CGSize(width: CGFloat(width), height: CGFloat(height)), keepAspectRatio: true) else {
+              DispatchQueue.main.async {
+                result(FlutterError(code: "PluginError", message: "Invalid resize params", details: nil))
+              }
+              return
+            }
+            img = resized
+            
+            switch outputType {
+            case .jpeg:
+              try img.saveToJPEGFile(dest: destUrl, quality: quality)
+            case .png:
+              try img.saveToPNGFile(dest: destUrl)
+            }
+            
+            DispatchQueue.main.async {
+              result(true)
+            }
+          } catch {
+            DispatchQueue.main.async {
+              result(FlutterError(code: "PluginError", message: error.localizedDescription, details: nil))
+            }
           }
         }
       }
+    
       
     default:
       result(FlutterMethodNotImplemented)

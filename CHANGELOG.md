@@ -1,3 +1,7 @@
+## 0.13.0
+
+- Use `generateCGImageAsynchronously` if available.
+
 ## 0.12.0
 
 - Reduce memory footprint on Android.
