@@ -1,3 +1,7 @@
+## 0.15.0
+
+- Update to gradle 8
+
 ## 0.13.0
 
 - Use `generateCGImageAsynchronously` if available.
