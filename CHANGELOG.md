@@ -1,3 +1,8 @@
+## 0.16.0
+
+- Remove from `Looper` to dispatcher.
+- Fix -1 is not a valid option on some devices.
+
 ## 0.15.0
 
 - Update to gradle 8
