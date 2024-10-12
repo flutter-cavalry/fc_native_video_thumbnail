@@ -79,7 +79,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.13.0"
+    version: "0.15.0"
   file_selector:
     dependency: "direct main"
     description:
