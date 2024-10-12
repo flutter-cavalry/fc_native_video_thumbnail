@@ -190,7 +190,7 @@ void FcNativeVideoThumbnailPlugin::HandleMethodCall(
     assert(width);
 
     const auto* outType =
-        std::get_if<std::string>(ValueOrNull(args, "type"));
+        std::get_if<std::string>(ValueOrNull(args, "format"));
     assert(outType);
 
     auto oper_res = SaveThumbnail(Utf16FromUtf8(*src_file).c_str(), Utf16FromUtf8(*dest_file).c_str(), *width, outType->compare("png") == 0 ? Gdiplus::ImageFormatPNG : Gdiplus::ImageFormatJPEG);

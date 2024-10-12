@@ -31,7 +31,7 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
       let destFile = args["destFile"] as! String
       let width = args["width"] as! Int
       let height = args["height"] as! Int
-      let outputString = args["type"] as! String
+      let outputString = args["format"] as! String
       let srcUri = args["srcFileUri"] as? Bool ?? false
       let quality = args["quality"] as? Int;
       let outputType = outputString == "png" ? FCImageOutputFormat.png : FCImageOutputFormat.jpeg

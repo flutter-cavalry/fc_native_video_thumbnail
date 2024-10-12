@@ -1,3 +1,7 @@
+## 0.16.1
+
+- Fix param name regression on Darwin and Windows.
+
 ## 0.16.0
 
 - Remove from `Looper` to dispatcher.
