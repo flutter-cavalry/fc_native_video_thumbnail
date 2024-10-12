@@ -30,7 +30,7 @@ class MethodChannelFcNativeVideoThumbnail
           'destFile': destFile,
           'width': width,
           'height': height,
-          'type': formatValue,
+          'format': formatValue,
           'quality': quality,
         })) ??
         false;

@@ -8,7 +8,6 @@ import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
-import android.os.Looper
 import android.provider.MediaStore
 import android.util.Size
 import androidx.annotation.NonNull
@@ -19,6 +18,9 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.StandardMethodCodec
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -35,10 +37,7 @@ class FcNativeVideoThumbnailPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var mContext : Context
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    val taskQueue =
-      flutterPluginBinding.binaryMessenger.makeBackgroundTaskQueue()
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "fc_native_video_thumbnail", StandardMethodCodec.INSTANCE,
-      taskQueue)
+    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "fc_native_video_thumbnail")
     channel.setMethodCallHandler(this)
     mContext = flutterPluginBinding.applicationContext
   }
@@ -46,52 +45,59 @@ class FcNativeVideoThumbnailPlugin: FlutterPlugin, MethodCallHandler {
   override fun onMethodCall(call: MethodCall, result: Result) {
     when (call.method) {
       "getVideoThumbnail" -> {
-        // Arguments are enforced on dart side.
-        val srcFile = call.argument<String>("srcFile")!!
-        val destFile = call.argument<String>("destFile")!!
-        val width = call.argument<Int>("width")!!
-        val height = call.argument<Int>("height")!!
-        val fileTypeString = call.argument<String>("type")!!
-        val srcFileUri = call.argument<Boolean>("srcFileUri") ?: false
+        CoroutineScope(Dispatchers.IO).launch {
+          try {
+            val srcFile = call.argument<String>("srcFile")!!
+            val destFile = call.argument<String>("destFile")!!
+            val width = call.argument<Int>("width")!!
+            val height = call.argument<Int>("height")!!
+            val fileTypeString = call.argument<String>("format")!!
+            val srcFileUri = call.argument<Boolean>("srcFileUri") ?: false
 
-        var quality = call.argument<Int?>("quality") ?: 90
-        if (quality < 0) {
-          quality = 0;
-        } else if (quality > 100) {
-          quality = 100;
-        }
-        val fileType: Bitmap.CompressFormat
-        if (fileTypeString == "png") {
-          fileType = Bitmap.CompressFormat.PNG
-          // Always use lossless PNG.
-          quality = 100
-        } else {
-          fileType = Bitmap.CompressFormat.JPEG
-        }
-        try {
-          var bitmap: Bitmap?
-          var scaled = false
-          if (srcFileUri) {
-            val mmr = MediaMetadataRetriever()
-            mmr.setDataSource(mContext, Uri.parse(srcFile))
-            if (Build.VERSION.SDK_INT >= 27) {
-              bitmap = mmr.getScaledFrameAtTime(-1, OPTION_CLOSEST_SYNC, width, height)
+            var quality = call.argument<Int?>("quality") ?: 90
+            if (quality < 0) {
+              quality = 0;
+            } else if (quality > 100) {
+              quality = 100;
+            }
+            val fileType: Bitmap.CompressFormat
+            if (fileTypeString == "png") {
+              fileType = Bitmap.CompressFormat.PNG
+              // Always use lossless PNG.
+              quality = 100
+            } else {
+              fileType = Bitmap.CompressFormat.JPEG
+            }
+
+            var bitmap: Bitmap?
+            var scaled = false
+            if (srcFileUri) {
+              val mmr = MediaMetadataRetriever()
+              mmr.setDataSource(mContext, Uri.parse(srcFile))
+              if (Build.VERSION.SDK_INT >= 27) {
+                bitmap = mmr.getScaledFrameAtTime(-1, OPTION_CLOSEST_SYNC, width, height)
+                scaled = true
+              } else {
+                bitmap = mmr.frameAtTime
+              }
+            } else if (Build.VERSION.SDK_INT >= 29) {
+              bitmap =
+                ThumbnailUtils.createVideoThumbnail(File(srcFile), Size(width, height), null)
               scaled = true
             } else {
-              bitmap = mmr.frameAtTime
+              bitmap = ThumbnailUtils.createVideoThumbnail(
+                srcFile,
+                MediaStore.Images.Thumbnails.MINI_KIND
+              )
             }
-          } else if (Build.VERSION.SDK_INT >= 29) {
-            bitmap = ThumbnailUtils.createVideoThumbnail(File(srcFile), Size(width, height), null)
-            scaled = true
-          }  else {
-            bitmap = ThumbnailUtils.createVideoThumbnail(srcFile, MediaStore.Images.Thumbnails.MINI_KIND)
-          }
 
-          if (bitmap == null) {
-            Handler(Looper.getMainLooper()).post {
-              result.success(false)
+            if (bitmap == null) {
+              launch(Dispatchers.Main) {
+                result.success(false)
+              }
+              return@launch
             }
-          } else {
+
             val oldWidth = bitmap.width
             val oldHeight = bitmap.height
 
@@ -109,16 +115,17 @@ class FcNativeVideoThumbnailPlugin: FlutterPlugin, MethodCallHandler {
             fos.write(bitmapData)
             fos.flush()
             fos.close()
-            Handler(Looper.getMainLooper()).post {
+            launch(Dispatchers.Main) {
               result.success(true)
             }
-          }
-        } catch (err: Exception) {
-          Handler(Looper.getMainLooper()).post {
-            result.error("Err", err.message, null)
+          } catch (err: Exception) {
+            launch(Dispatchers.Main) {
+              result.error("PluginError", err.message, null)
+            }
           }
         }
       }
+
       else -> result.notImplemented()
     }
   }
