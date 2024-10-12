@@ -3,6 +3,7 @@ package com.fluttercavalry.fc_native_video_thumbnail
 import android.content.Context
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
+import android.media.MediaMetadataRetriever.OPTION_CLOSEST_SYNC
 import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build
@@ -33,7 +34,7 @@ class FcNativeVideoThumbnailPlugin: FlutterPlugin, MethodCallHandler {
 
   private lateinit var mContext : Context
 
-  override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+  override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     val taskQueue =
       flutterPluginBinding.binaryMessenger.makeBackgroundTaskQueue()
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "fc_native_video_thumbnail", StandardMethodCodec.INSTANCE,
@@ -42,14 +43,14 @@ class FcNativeVideoThumbnailPlugin: FlutterPlugin, MethodCallHandler {
     mContext = flutterPluginBinding.applicationContext
   }
 
-  override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+  override fun onMethodCall(call: MethodCall, result: Result) {
     when (call.method) {
       "getVideoThumbnail" -> {
         // Arguments are enforced on dart side.
         val srcFile = call.argument<String>("srcFile")!!
         val destFile = call.argument<String>("destFile")!!
-        var width = call.argument<Int>("width")!!
-        var height = call.argument<Int>("height")!!
+        val width = call.argument<Int>("width")!!
+        val height = call.argument<Int>("height")!!
         val fileTypeString = call.argument<String>("type")!!
         val srcFileUri = call.argument<Boolean>("srcFileUri") ?: false
 
@@ -74,7 +75,7 @@ class FcNativeVideoThumbnailPlugin: FlutterPlugin, MethodCallHandler {
             val mmr = MediaMetadataRetriever()
             mmr.setDataSource(mContext, Uri.parse(srcFile))
             if (Build.VERSION.SDK_INT >= 27) {
-              bitmap = mmr.getScaledFrameAtTime(-1, -1, width, height)
+              bitmap = mmr.getScaledFrameAtTime(-1, OPTION_CLOSEST_SYNC, width, height)
               scaled = true
             } else {
               bitmap = mmr.frameAtTime
@@ -132,7 +133,7 @@ class FcNativeVideoThumbnailPlugin: FlutterPlugin, MethodCallHandler {
     return Pair((width * minAspectRatio).roundToInt(), (height * minAspectRatio).roundToInt())
   }
 
-  override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+  override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     channel.setMethodCallHandler(null)
   }
 }
