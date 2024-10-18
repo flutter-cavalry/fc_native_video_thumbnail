@@ -73,7 +73,7 @@ class FcNativeVideoThumbnailPlugin: FlutterPlugin, MethodCallHandler {
             var scaled = false
             if (srcFileUri) {
               val mmr = MediaMetadataRetriever()
-              mmr.setDataSource(mContext, Uri.parse(srcFile))
+              mmr.setDataSource(srcFile, hashMapOf())
               if (Build.VERSION.SDK_INT >= 27) {
                 bitmap = mmr.getScaledFrameAtTime(-1, OPTION_CLOSEST_SYNC, width, height)
                 scaled = true
@@ -120,6 +120,7 @@ class FcNativeVideoThumbnailPlugin: FlutterPlugin, MethodCallHandler {
             }
           } catch (err: Exception) {
             launch(Dispatchers.Main) {
+              android.util.Log.e("PluginErrir", "getVideoThumbnail failed", err);
               result.error("PluginError", err.message, null)
             }
           }
