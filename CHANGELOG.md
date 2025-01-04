@@ -1,3 +1,7 @@
+## 0.17.0
+
+- Add Swift Package Manager support.
+
 ## 0.16.1
 
 - Fix param name regression on Darwin and Windows.
