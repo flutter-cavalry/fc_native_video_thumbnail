@@ -7,17 +7,14 @@ import android.media.MediaMetadataRetriever.OPTION_CLOSEST_SYNC
 import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build
-import android.os.Handler
 import android.provider.MediaStore
 import android.util.Size
-import androidx.annotation.NonNull
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.StandardMethodCodec
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -45,7 +42,7 @@ class FcNativeVideoThumbnailPlugin: FlutterPlugin, MethodCallHandler {
   override fun onMethodCall(call: MethodCall, result: Result) {
     when (call.method) {
       "getVideoThumbnail" -> {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Default).launch {
           try {
             val srcFile = call.argument<String>("srcFile")!!
             val destFile = call.argument<String>("destFile")!!
@@ -56,9 +53,9 @@ class FcNativeVideoThumbnailPlugin: FlutterPlugin, MethodCallHandler {
 
             var quality = call.argument<Int?>("quality") ?: 90
             if (quality < 0) {
-              quality = 0;
+              quality = 0
             } else if (quality > 100) {
-              quality = 100;
+              quality = 100
             }
             val fileType: Bitmap.CompressFormat
             if (fileTypeString == "png") {
