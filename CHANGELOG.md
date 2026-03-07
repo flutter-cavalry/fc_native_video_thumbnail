@@ -1,3 +1,7 @@
+## 1.0.0
+
+- First stable version.
+
 ## 0.17.2
 
 - Switch to `Dispatchers.Default`.
