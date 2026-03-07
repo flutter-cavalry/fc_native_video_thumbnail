@@ -1,3 +1,11 @@
+## 2.0.0
+
+- **Breaking**: we now have 2 APIs:
+  - `saveThumbnailToFile` saves the thumbnail to a file path.
+  - `saveThumbnailToBytes` returns the thumbnail as a byte array.
+- Upgraded plugin and example projects to latest Flutter project structure.
+- Added `at` option to specify the time position of the thumbnail in seconds.
+
 ## 1.0.0
 
 - First stable version.
