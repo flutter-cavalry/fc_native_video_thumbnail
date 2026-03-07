@@ -8,7 +8,9 @@ A Flutter plugin to create video thumbnails via native APIs.
 | ------------- | --- | ------- | ----- | ------- |
 | Source (Path) | ✅  | ✅      | ✅    | ✅      |
 | Source (Uri)  | ✅  | ✅      | ✅    | -       |
-| At (Second)   | ✅  | -      | ✅    | -       |
+| Seeking       | ✅  | ⚠️      | ✅    | -       |
+
+⚠️ Android seeking is only supported when the source file is a Uri.
 
 ## Usage
 
@@ -57,11 +59,6 @@ try {
 ```
 
 ### Seeking to a specific time position
-
-Note that seeking is not supported in the following cases:
-
-- Windows
-- Android if source file is a path (not a Uri)
 
 ```dart
 await plugin.saveThumbnailToFile(
