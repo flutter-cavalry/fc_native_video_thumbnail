@@ -12,9 +12,9 @@ class FcNativeVideoThumbnail {
   ///   Windows doesn't support non-square thumbnail images, only [width] is used in Windows, resulting in a [width]x[width] max thumbnail.
   /// [format] only "jpeg" is supported. Defaults to "jpeg".
   /// [quality] a fallback value for the quality of the thumbnail image (0-100). May be ignored by the platform.
-  /// [at] the time position of the thumbnail in seconds.
+  /// [at] the time position of the thumbnail.
   ///   Defaults to 1 on iOS/macOS.
-  ///   Ignored on Windows/Android.
+  ///   Ignored on Windows.
   ///
   /// Returns true if thumbnail was successfully created. Or false if thumbnail is not available.
   /// Throws if error happens during thumbnail generation.
@@ -25,7 +25,7 @@ class FcNativeVideoThumbnail {
       required int height,
       String? format,
       bool? srcFileUri,
-      double? at,
+      FcVideoThumbnailTime? at,
       int? quality}) {
     if (width <= 0 || height <= 0) {
       throw ArgumentError('width and height must be greater than 0');
@@ -49,9 +49,9 @@ class FcNativeVideoThumbnail {
   ///   Windows doesn't support non-square thumbnail images, only [width] is used in Windows, resulting in a [width]x[width] max thumbnail.
   /// [format] only "jpeg" is supported. Defaults to "jpeg".
   /// [quality] a fallback value for the quality of the thumbnail image (0-100). May be ignored by the platform.
-  /// [at] the time position of the thumbnail in seconds.
+  /// [at] the time position of the thumbnail.
   ///   Defaults to 1 on iOS/macOS.
-  ///   Ignored on Windows/Android.
+  ///   Ignored on Windows.
   ///
   /// Returns the thumbnail as bytes if successfully created. Or null if thumbnail is not available.
   /// Throws if error happens during thumbnail generation.
@@ -61,7 +61,7 @@ class FcNativeVideoThumbnail {
       required int height,
       String? format,
       bool? srcFileUri,
-      double? at,
+      FcVideoThumbnailTime? at,
       int? quality}) {
     if (width <= 0 || height <= 0) {
       throw ArgumentError('width and height must be greater than 0');

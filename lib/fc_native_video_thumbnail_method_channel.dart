@@ -18,7 +18,7 @@ class MethodChannelFcNativeVideoThumbnail
       required int height,
       String? format,
       bool? srcFileUri,
-      double? at,
+      FcVideoThumbnailTime? at,
       int? quality}) async {
     if (width <= 0 && height <= 0) {
       throw ArgumentError('Invalid width and height');
@@ -30,8 +30,8 @@ class MethodChannelFcNativeVideoThumbnail
           'width': width,
           'height': height,
           'format': _defaultFormat(format),
-          'at': at,
           'quality': quality,
+          ...?at?.toMap(),
         })) ??
         false;
   }
@@ -43,7 +43,7 @@ class MethodChannelFcNativeVideoThumbnail
       required int height,
       String? format,
       bool? srcFileUri,
-      double? at,
+      FcVideoThumbnailTime? at,
       int? quality}) {
     if (width <= 0 && height <= 0) {
       throw ArgumentError('Invalid width and height');
@@ -54,8 +54,8 @@ class MethodChannelFcNativeVideoThumbnail
       'width': width,
       'height': height,
       'format': _defaultFormat(format),
-      'at': at,
       'quality': quality,
+      ...?at?.toMap(),
     });
   }
 

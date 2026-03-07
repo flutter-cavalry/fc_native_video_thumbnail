@@ -4,6 +4,43 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'fc_native_video_thumbnail_method_channel.dart';
 
+enum FcVideoThumbnailTimeUnit {
+  seconds,
+  milliseconds,
+  microseconds,
+}
+
+class FcVideoThumbnailTime {
+  final int value;
+  final FcVideoThumbnailTimeUnit unit;
+
+  FcVideoThumbnailTime(this.value, this.unit);
+
+  Map<String, dynamic> toMap() {
+    var us = -1;
+    switch (unit) {
+      case FcVideoThumbnailTimeUnit.seconds:
+        us = (value * 1e6).toInt();
+        break;
+      case FcVideoThumbnailTimeUnit.milliseconds:
+        us = value * 1000;
+        break;
+      case FcVideoThumbnailTimeUnit.microseconds:
+        us = value;
+        break;
+      default:
+        us = -1;
+        break;
+    }
+    if (us < 0) {
+      return {};
+    }
+    return {
+      'atUs': us,
+    };
+  }
+}
+
 abstract class FcNativeVideoThumbnailPlatform extends PlatformInterface {
   /// Constructs a FcNativeVideoThumbnailPlatform.
   FcNativeVideoThumbnailPlatform() : super(token: _token);
@@ -33,7 +70,7 @@ abstract class FcNativeVideoThumbnailPlatform extends PlatformInterface {
       required int height,
       String? format,
       bool? srcFileUri,
-      double? at,
+      FcVideoThumbnailTime? at,
       int? quality}) {
     throw UnimplementedError('saveThumbnailToFile() has not been implemented.');
   }
@@ -44,7 +81,7 @@ abstract class FcNativeVideoThumbnailPlatform extends PlatformInterface {
       required int height,
       String? format,
       bool? srcFileUri,
-      double? at,
+      FcVideoThumbnailTime? at,
       int? quality}) {
     throw UnimplementedError(
         'saveThumbnailToBytes() has not been implemented.');
