@@ -13,11 +13,11 @@ A new Flutter plugin project.
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Your Company' => 'email@example.com' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'fc_native_video_thumbnail/Sources/fc_native_video_thumbnail/**/*'
 
   # Set the deployment targets for both iOS and macOS.
-  s.ios.deployment_target = '13.0'
-  s.osx.deployment_target = '10.15'
+  s.ios.deployment_target = '14.0'
+  s.osx.deployment_target = '11.0'
 
   # Define the platform-specific dependencies.
   s.ios.dependency 'Flutter'
@@ -33,5 +33,5 @@ A new Flutter plugin project.
   # required reason APIs, update the PrivacyInfo.xcprivacy file to describe your
   # plugin's privacy impact, and then uncomment this line. For more information,
   # see https://developer.apple.com/documentation/bundleresources/privacy_manifest_files
-  # s.resource_bundles = {'fc_native_video_thumbnail_privacy' => ['Resources/PrivacyInfo.xcprivacy']}
+  # s.resource_bundles = {'fc_native_video_thumbnail_privacy' => ['fc_native_video_thumbnail/Sources/fc_native_video_thumbnail/PrivacyInfo.xcprivacy']}
 end
