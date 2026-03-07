@@ -11,6 +11,17 @@ A Flutter plugin to create video thumbnails via native APIs.
 
 ## Usage
 
+There are 2 APIs:
+
+- `saveThumbnailToFile` saves the thumbnail to a file path.
+  - Returns true if thumbnail was successfully created. Or false if thumbnail is not available.
+  - Throws if error happens during thumbnail generation.
+- `saveThumbnailToBytes` returns the thumbnail as a byte array.
+  - Returns the thumbnail as bytes if successfully created. Or null if thumbnail is not available.
+  - Throws if error happens during thumbnail generation.
+
+Example:
+
 ```dart
 final plugin = FcNativeVideoThumbnail();
 
@@ -27,9 +38,17 @@ try {
   ///
   /// Returns true if thumbnail was successfully created. Or false if thumbnail is not available.
   /// Throws if error happens during thumbnail generation.
-  final thumbnailGenerated = await plugin.getVideoThumbnail(
+  final generated = await plugin.saveThumbnailToFile(
             srcFile: srcFile,
             destFile: destFile,
+            width: 300,
+            height: 300,
+            format: 'jpeg',
+            quality: 90);
+
+  // `saveThumbnailToBytes` has same options as `saveThumbnailToFile` except `destFile`.
+  final thumbnailBytes = await plugin.saveThumbnailToBytes(
+            srcFile: srcFile,
             width: 300,
             height: 300,
             format: 'jpeg',
