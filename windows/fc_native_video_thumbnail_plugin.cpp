@@ -134,11 +134,12 @@ std::string ExtractThumbnailBitmap(PCWSTR srcFile, int size, HBITMAP* outBitmap)
     return "`GetThumbnail` failed with " + HRESULTToString(hr);
   }
 
-  hr = pSharedBitmap->GetSharedBitmap(outBitmap);
+  // Take ownership of the bitmap handle so it stays valid after COM releases.
+  hr = pSharedBitmap->Detach(outBitmap);
   pSharedBitmap->Release();
   if (!SUCCEEDED(hr) || !*outBitmap) {
     pThumbCache->Release();
-    return "`GetSharedBitmap` failed with " + HRESULTToString(hr);
+    return "`Detach` failed with " + HRESULTToString(hr);
   }
 
   pThumbCache->Release();

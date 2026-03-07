@@ -119,7 +119,8 @@ class _MyHomeState extends State<MyHome> {
         child: Padding(
           padding: const EdgeInsets.all(10),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
             spacing: 8,
             children: [
               if (Platform.isAndroid || Platform.isIOS) ...[
