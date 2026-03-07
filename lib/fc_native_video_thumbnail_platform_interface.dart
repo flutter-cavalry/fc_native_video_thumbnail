@@ -33,6 +33,7 @@ abstract class FcNativeVideoThumbnailPlatform extends PlatformInterface {
       required int height,
       String? format,
       bool? srcFileUri,
+      double? at,
       int? quality}) {
     throw UnimplementedError('saveThumbnailToFile() has not been implemented.');
   }
@@ -43,6 +44,7 @@ abstract class FcNativeVideoThumbnailPlatform extends PlatformInterface {
       required int height,
       String? format,
       bool? srcFileUri,
+      double? at,
       int? quality}) {
     throw UnimplementedError(
         'saveThumbnailToBytes() has not been implemented.');

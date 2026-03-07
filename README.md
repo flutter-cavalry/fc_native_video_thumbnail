@@ -4,10 +4,11 @@
 
 A Flutter plugin to create video thumbnails via native APIs.
 
-|      | iOS | Android | macOS | Windows |
-| ---- | --- | ------- | ----- | ------- |
-| Path | ✅  | ✅      | ✅    | ✅      |
-| Uri  | ✅  | ✅      | ✅    | -       |
+|               | iOS | Android | macOS | Windows |
+| ------------- | --- | ------- | ----- | ------- |
+| Source (Path) | ✅  | ✅      | ✅    | ✅      |
+| Source (Uri)  | ✅  | ✅      | ✅    | -       |
+| At (Second)   | ✅  | ✅      | ✅    | -       |
 
 ## Usage
 
@@ -26,27 +27,28 @@ Example:
 final plugin = FcNativeVideoThumbnail();
 
 try {
-  /// Gets a thumbnail from [srcFile] with the given options and saves it to [destFile].
+  /// Extracts a thumbnail from [srcFile] with the given options and saves it to [destFile].
   ///
   /// [srcFile] source video path or Uri (See [srcFileUri]).
   /// [srcFileUri] If true, [srcFile] is a Uri (Android/iOS/macOS only).
   /// [destFile] destination thumbnail path.
   /// [width] / [height] max dimensions of the destination thumbnail.
-  /// Windows doesn't support non-square thumbnail images, only [width] is used in Windows, resulting in a [width]x[width] max thumbnail.
+  ///   Windows doesn't support non-square thumbnail images, only [width] is used in Windows, resulting in a [width]x[width] max thumbnail.
   /// [format] only "jpeg" is supported. Defaults to "jpeg".
   /// [quality] a fallback value for the quality of the thumbnail image (0-100). May be ignored by the platform.
-  ///
-  /// Returns true if thumbnail was successfully created. Or false if thumbnail is not available.
-  /// Throws if error happens during thumbnail generation.
+  /// [at] the time position of the thumbnail in seconds.
+  ///   Defaults to 1 on iOS/macOS.
+  ///   Ignored on Windows.
   final generated = await plugin.saveThumbnailToFile(
             srcFile: srcFile,
             destFile: destFile,
             width: 300,
             height: 300,
             format: 'jpeg',
-            quality: 90);
+            quality: 90,
+            at: 1);
 
-  // `saveThumbnailToBytes` has same options as `saveThumbnailToFile` except `destFile`.
+  // `saveThumbnailToBytes` has the same options as `saveThumbnailToFile` except `destFile`.
   final thumbnailBytes = await plugin.saveThumbnailToBytes(
             srcFile: srcFile,
             width: 300,

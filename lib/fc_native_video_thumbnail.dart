@@ -9,9 +9,12 @@ class FcNativeVideoThumbnail {
   /// [srcFileUri] If true, [srcFile] is a Uri (Android/iOS/macOS only).
   /// [destFile] destination thumbnail path.
   /// [width] / [height] max dimensions of the destination thumbnail.
-  /// Windows doesn't support non-square thumbnail images, only [width] is used in Windows, resulting in a [width]x[width] max thumbnail.
+  ///   Windows doesn't support non-square thumbnail images, only [width] is used in Windows, resulting in a [width]x[width] max thumbnail.
   /// [format] only "jpeg" is supported. Defaults to "jpeg".
   /// [quality] a fallback value for the quality of the thumbnail image (0-100). May be ignored by the platform.
+  /// [at] the time position of the thumbnail in seconds.
+  ///   Defaults to 1 on iOS/macOS.
+  ///   Ignored on Windows.
   ///
   /// Returns true if thumbnail was successfully created. Or false if thumbnail is not available.
   /// Throws if error happens during thumbnail generation.
@@ -22,6 +25,7 @@ class FcNativeVideoThumbnail {
       required int height,
       String? format,
       bool? srcFileUri,
+      double? at,
       int? quality}) {
     if (width <= 0 || height <= 0) {
       throw ArgumentError('width and height must be greater than 0');
@@ -33,6 +37,7 @@ class FcNativeVideoThumbnail {
         height: height,
         format: format,
         srcFileUri: srcFileUri,
+        at: at,
         quality: quality);
   }
 
@@ -44,6 +49,9 @@ class FcNativeVideoThumbnail {
   /// Windows doesn't support non-square thumbnail images, only [width] is used in Windows, resulting in a [width]x[width] max thumbnail.
   /// [format] only "jpeg" is supported. Defaults to "jpeg".
   /// [quality] a fallback value for the quality of the thumbnail image (0-100). May be ignored by the platform.
+  /// [at] the time position of the thumbnail in seconds.
+  ///   Defaults to 1 on iOS/macOS.
+  ///   Ignored on Windows.
   ///
   /// Returns the thumbnail as bytes if successfully created. Or null if thumbnail is not available.
   /// Throws if error happens during thumbnail generation.
@@ -53,6 +61,7 @@ class FcNativeVideoThumbnail {
       required int height,
       String? format,
       bool? srcFileUri,
+      double? at,
       int? quality}) {
     if (width <= 0 || height <= 0) {
       throw ArgumentError('width and height must be greater than 0');
@@ -63,6 +72,7 @@ class FcNativeVideoThumbnail {
         height: height,
         format: format,
         srcFileUri: srcFileUri,
+        at: at,
         quality: quality);
   }
 }
