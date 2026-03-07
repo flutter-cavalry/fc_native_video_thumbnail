@@ -8,7 +8,7 @@ A Flutter plugin to create video thumbnails via native APIs.
 | ------------- | --- | ------- | ----- | ------- |
 | Source (Path) | ✅  | ✅      | ✅    | ✅      |
 | Source (Uri)  | ✅  | ✅      | ✅    | -       |
-| At (Second)   | ✅  | ✅      | ✅    | -       |
+| At (Second)   | ✅  | -      | ✅    | -       |
 
 ## Usage
 
@@ -38,7 +38,7 @@ try {
   /// [quality] a fallback value for the quality of the thumbnail image (0-100). May be ignored by the platform.
   /// [at] the time position of the thumbnail in seconds.
   ///   Defaults to 1 on iOS/macOS.
-  ///   Ignored on Windows.
+  ///   Ignored on Windows/Android.
   final generated = await plugin.saveThumbnailToFile(
             srcFile: srcFile,
             destFile: destFile,

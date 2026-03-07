@@ -40,90 +40,83 @@ class FcNativeVideoThumbnailPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   override fun onMethodCall(call: MethodCall, result: Result) {
-    when (call.method) {
-      "getVideoThumbnail" -> {
-        CoroutineScope(Dispatchers.Default).launch {
-          try {
-            val srcFile = call.argument<String>("srcFile")!!
-            val destFile = call.argument<String>("destFile")!!
-            val width = call.argument<Int>("width")!!
-            val height = call.argument<Int>("height")!!
-            val fileTypeString = call.argument<String>("format")!!
-            val srcFileUri = call.argument<Boolean>("srcFileUri") ?: false
+    val saveToFile = call.method == "saveThumbnailToFile"
+    val saveToBytes = call.method == "saveThumbnailToBytes"
+    if (!saveToFile && !saveToBytes) {
+      result.notImplemented()
+      return
+    }
 
-            var quality = call.argument<Int?>("quality") ?: 90
-            if (quality < 0) {
-              quality = 0
-            } else if (quality > 100) {
-              quality = 100
-            }
-            val fileType: Bitmap.CompressFormat
-            if (fileTypeString == "png") {
-              fileType = Bitmap.CompressFormat.PNG
-              // Always use lossless PNG.
-              quality = 100
-            } else {
-              fileType = Bitmap.CompressFormat.JPEG
-            }
+    CoroutineScope(Dispatchers.Default).launch {
+      try {
+        val srcFile = call.argument<String>("srcFile")!!
+        val destFile = call.argument<String>("destFile")
+        val width = call.argument<Int>("width")!!
+        val height = call.argument<Int>("height")!!
+        val srcFileUri = call.argument<Boolean>("srcFileUri") ?: false
+        var quality = call.argument<Int?>("quality") ?: 90
+        if (quality < 0) {
+          quality = 0
+        } else if (quality > 100) {
+          quality = 100
+        }
 
-            var bitmap: Bitmap?
-            var scaled = false
-            if (srcFileUri) {
-              val mmr = MediaMetadataRetriever()
-              mmr.setDataSource(mContext, Uri.parse(srcFile))
-              if (Build.VERSION.SDK_INT >= 27) {
-                bitmap = mmr.getScaledFrameAtTime(-1, OPTION_CLOSEST_SYNC, width, height)
-                scaled = true
-              } else {
-                bitmap = mmr.frameAtTime
-              }
-            } else if (Build.VERSION.SDK_INT >= 29) {
-              bitmap =
-                ThumbnailUtils.createVideoThumbnail(File(srcFile), Size(width, height), null)
-              scaled = true
-            } else {
-              bitmap = ThumbnailUtils.createVideoThumbnail(
-                srcFile,
-                MediaStore.Images.Thumbnails.MINI_KIND
-              )
-            }
+        var bitmap: Bitmap?
+        var scaled = false
+        if (srcFileUri) {
+          val mmr = MediaMetadataRetriever()
+          mmr.setDataSource(mContext, Uri.parse(srcFile))
+          if (Build.VERSION.SDK_INT >= 27) {
+            bitmap = mmr.getScaledFrameAtTime(-1, OPTION_CLOSEST_SYNC, width, height)
+            scaled = true
+          } else {
+            bitmap = mmr.frameAtTime
+          }
+        } else if (Build.VERSION.SDK_INT >= 29) {
+          bitmap =
+            ThumbnailUtils.createVideoThumbnail(File(srcFile), Size(width, height), null)
+          scaled = true
+        } else {
+          bitmap = ThumbnailUtils.createVideoThumbnail(
+            srcFile,
+            MediaStore.Images.Thumbnails.MINI_KIND
+          )
+        }
 
-            if (bitmap == null) {
-              launch(Dispatchers.Main) {
-                result.success(false)
-              }
-              return@launch
-            }
+        if (bitmap == null) {
+          launch(Dispatchers.Main) {
+            result.success(if (saveToBytes) null else false)
+          }
+          return@launch
+        }
 
-            val oldWidth = bitmap.width
-            val oldHeight = bitmap.height
+        val oldWidth = bitmap.width
+        val oldHeight = bitmap.height
 
-            // Check if we need to resize.
-            if (!scaled && oldWidth != width && oldHeight != height) {
-              val newSize: Pair<Int, Int> = sizeToFit(oldWidth, oldHeight, width, height)
-              bitmap = Bitmap.createScaledBitmap(bitmap, newSize.first, newSize.second, true)
-            }
-
-            val bos = ByteArrayOutputStream()
-            bitmap.compress(fileType, quality, bos)
-            val bitmapData = bos.toByteArray()
-
-            val fos = FileOutputStream(destFile)
-            fos.write(bitmapData)
-            fos.flush()
-            fos.close()
-            launch(Dispatchers.Main) {
-              result.success(true)
-            }
-          } catch (err: Exception) {
-            launch(Dispatchers.Main) {
-              result.error("PluginError", err.message, null)
-            }
+        // Check if we need to resize.
+        if (!scaled && oldWidth != width && oldHeight != height) {
+          val newSize: Pair<Int, Int> = sizeToFit(oldWidth, oldHeight, width, height)
+          bitmap = Bitmap.createScaledBitmap(bitmap, newSize.first, newSize.second, true)
+        }
+        if (saveToBytes) {
+          val output = ByteArrayOutputStream()
+          bitmap.compress(Bitmap.CompressFormat.JPEG, quality, output)
+          launch(Dispatchers.Main) {
+            result.success(output.toByteArray())
+          }
+        } else {
+          FileOutputStream(destFile).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, out)
+          }
+          launch(Dispatchers.Main) {
+            result.success(true)
           }
         }
+      } catch (err: Exception) {
+        launch(Dispatchers.Main) {
+          result.error("PluginError", err.message, null)
+        }
       }
-
-      else -> result.notImplemented()
     }
   }
 
