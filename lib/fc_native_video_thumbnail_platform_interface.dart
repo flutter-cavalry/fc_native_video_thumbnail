@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'fc_native_video_thumbnail_method_channel.dart';
@@ -24,7 +26,7 @@ abstract class FcNativeVideoThumbnailPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<bool> getVideoThumbnail(
+  Future<bool> saveThumbnailToFile(
       {required String srcFile,
       required String destFile,
       required int width,
@@ -32,6 +34,17 @@ abstract class FcNativeVideoThumbnailPlatform extends PlatformInterface {
       String? format,
       bool? srcFileUri,
       int? quality}) {
-    throw UnimplementedError('getVideoThumbnail() has not been implemented.');
+    throw UnimplementedError('saveThumbnailToFile() has not been implemented.');
+  }
+
+  Future<Uint8List?> saveThumbnailToBytes(
+      {required String srcFile,
+      required int width,
+      required int height,
+      String? format,
+      bool? srcFileUri,
+      int? quality}) {
+    throw UnimplementedError(
+        'saveThumbnailToBytes() has not been implemented.');
   }
 }

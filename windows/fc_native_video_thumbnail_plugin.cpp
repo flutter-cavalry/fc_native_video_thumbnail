@@ -20,6 +20,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <vector>
 
 const std::string kGetThumbnailFailedExtraction = "Failed extraction";
 
@@ -96,7 +97,9 @@ std::string HRESULTToString(HRESULT hr) {
   return res;
 }
 
-std::string SaveThumbnail(PCWSTR srcFile, PCWSTR destFile, int size, REFGUID type) {
+std::string ExtractThumbnailBitmap(PCWSTR srcFile, int size, HBITMAP* outBitmap) {
+  *outBitmap = NULL;
+
   IShellItem* pSI;
   HRESULT hr = SHCreateItemFromParsingName(srcFile, NULL, IID_IShellItem, (void**)&pSI);
   if (!SUCCEEDED(hr)) {
@@ -110,8 +113,10 @@ std::string SaveThumbnail(PCWSTR srcFile, PCWSTR destFile, int size, REFGUID typ
                         IID_PPV_ARGS(&pThumbCache));
 
   if (!SUCCEEDED(hr)) {
+    pSI->Release();
     return "`CoCreateInstance` failed with " + HRESULTToString(hr);
   }
+
   ISharedBitmap* pSharedBitmap = NULL;
   hr = pThumbCache->GetThumbnail(pSI,
                                  size,
@@ -119,6 +124,7 @@ std::string SaveThumbnail(PCWSTR srcFile, PCWSTR destFile, int size, REFGUID typ
                                  &pSharedBitmap,
                                  NULL,
                                  NULL);
+  pSI->Release();
 
   if (!SUCCEEDED(hr) || !pSharedBitmap) {
     pThumbCache->Release();
@@ -127,22 +133,82 @@ std::string SaveThumbnail(PCWSTR srcFile, PCWSTR destFile, int size, REFGUID typ
     }
     return "`GetThumbnail` failed with " + HRESULTToString(hr);
   }
-  HBITMAP hBitmap;
-  hr = pSharedBitmap->GetSharedBitmap(&hBitmap);
-  if (!SUCCEEDED(hr) || !hBitmap) {
+
+  hr = pSharedBitmap->GetSharedBitmap(outBitmap);
+  pSharedBitmap->Release();
+  if (!SUCCEEDED(hr) || !*outBitmap) {
     pThumbCache->Release();
     return "`GetSharedBitmap` failed with " + HRESULTToString(hr);
   }
 
   pThumbCache->Release();
 
+  return "";
+}
+
+std::string SaveThumbnailToFile(PCWSTR srcFile, PCWSTR destFile, int size, REFGUID type) {
+  HBITMAP hBitmap;
+  auto extractResult = ExtractThumbnailBitmap(srcFile, size, &hBitmap);
+  if (extractResult != "") {
+    return extractResult;
+  }
+
   // Save the bitmap to a file
   CImage image;
   image.Attach(hBitmap);
-  hr = image.Save(destFile, type);
+  HRESULT hr = image.Save(destFile, type);
   if (!SUCCEEDED(hr)) {
     return "`image.Attach` failed with " + HRESULTToString(hr);
   }
+  return "";
+}
+
+std::string SaveThumbnailToBytes(PCWSTR srcFile,
+                                 int size,
+                                 REFGUID type,
+                                 std::vector<uint8_t>* outBytes) {
+  outBytes->clear();
+
+  HBITMAP hBitmap;
+  auto extractResult = ExtractThumbnailBitmap(srcFile, size, &hBitmap);
+  if (extractResult != "") {
+    return extractResult;
+  }
+
+  CImage image;
+  image.Attach(hBitmap);
+
+  IStream* stream = nullptr;
+  HRESULT hr = CreateStreamOnHGlobal(NULL, TRUE, &stream);
+  if (!SUCCEEDED(hr) || !stream) {
+    return "`CreateStreamOnHGlobal` failed with " + HRESULTToString(hr);
+  }
+
+  hr = image.Save(stream, type);
+  if (!SUCCEEDED(hr)) {
+    stream->Release();
+    return "`image.Save` failed with " + HRESULTToString(hr);
+  }
+
+  HGLOBAL imageDataHandle = NULL;
+  hr = GetHGlobalFromStream(stream, &imageDataHandle);
+  if (!SUCCEEDED(hr) || !imageDataHandle) {
+    stream->Release();
+    return "`GetHGlobalFromStream` failed with " + HRESULTToString(hr);
+  }
+
+  SIZE_T imageSize = GlobalSize(imageDataHandle);
+  if (imageSize > 0) {
+    auto* imageBytes = reinterpret_cast<uint8_t*>(GlobalLock(imageDataHandle));
+    if (!imageBytes) {
+      stream->Release();
+      return "`GlobalLock` failed.";
+    }
+    outBytes->assign(imageBytes, imageBytes + imageSize);
+    GlobalUnlock(imageDataHandle);
+  }
+
+  stream->Release();
   return "";
 }
 
@@ -171,36 +237,71 @@ FcNativeVideoThumbnailPlugin::~FcNativeVideoThumbnailPlugin() {}
 void FcNativeVideoThumbnailPlugin::HandleMethodCall(
     const flutter::MethodCall<flutter::EncodableValue>& method_call,
     std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-  const auto* argsPtr = std::get_if<flutter::EncodableMap>(method_call.arguments());
-  assert(argsPtr);
-  auto args = *argsPtr;
-  if (method_call.method_name().compare("getVideoThumbnail") == 0) {
-    // Required arguments are enforced on dart side.
-    const auto* src_file =
-        std::get_if<std::string>(ValueOrNull(args, "srcFile"));
-    assert(src_file);
+  const auto& methodName = method_call.method_name();
+  if (methodName.compare("saveThumbnailToFile") != 0 &&
+      methodName.compare("saveThumbnailToBytes") != 0) {
+    result->NotImplemented();
+    return;
+  }
 
+  const auto* argsPtr = std::get_if<flutter::EncodableMap>(method_call.arguments());
+  if (!argsPtr) {
+    result->Error("InvalidArguments", "Arguments are required.");
+    return;
+  }
+  auto args = *argsPtr;
+
+  const auto* src_file =
+      std::get_if<std::string>(ValueOrNull(args, "srcFile"));
+  if (!src_file) {
+    result->Error("InvalidArguments", "Missing required argument: srcFile.");
+    return;
+  }
+
+  auto width = GetInt64ValueOrNull(args, "width");
+  if (!width || *width <= 0 || *width > INT_MAX) {
+    result->Error("InvalidArguments", "width must be an int in the range (0, INT_MAX].");
+    return;
+  }
+
+  const auto* outType =
+      std::get_if<std::string>(ValueOrNull(args, "format"));
+  const auto& imageFormat =
+      outType && outType->compare("png") == 0 ? Gdiplus::ImageFormatPNG : Gdiplus::ImageFormatJPEG;
+
+  if (methodName.compare("saveThumbnailToFile") == 0) {
     const auto* dest_file =
         std::get_if<std::string>(ValueOrNull(args, "destFile"));
-    assert(dest_file);
+    if (!dest_file) {
+      result->Error("InvalidArguments", "Missing required argument: destFile.");
+      return;
+    }
 
-    // NOTE: `width` is used as thumbnail size.
-    const auto* width =
-        std::get_if<int>(ValueOrNull(args, "width"));
-    assert(width);
+    auto operationResult = SaveThumbnailToFile(Utf16FromUtf8(*src_file).c_str(),
+                                               Utf16FromUtf8(*dest_file).c_str(),
+                                               static_cast<int>(*width),
+                                               imageFormat);
 
-    const auto* outType =
-        std::get_if<std::string>(ValueOrNull(args, "format"));
-    assert(outType);
-
-    auto oper_res = SaveThumbnail(Utf16FromUtf8(*src_file).c_str(), Utf16FromUtf8(*dest_file).c_str(), *width, outType->compare("png") == 0 ? Gdiplus::ImageFormatPNG : Gdiplus::ImageFormatJPEG);
-
-    if (oper_res == kGetThumbnailFailedExtraction) {
+    if (operationResult == kGetThumbnailFailedExtraction) {
       result->Success(flutter::EncodableValue(false));
-    } else if (oper_res != "") {
-      result->Error("PluginError", "Operation failed. " + oper_res);
+    } else if (operationResult != "") {
+      result->Error("PluginError", "Operation failed. " + operationResult);
     } else {
       result->Success(flutter::EncodableValue(true));
+    }
+  } else if (methodName.compare("saveThumbnailToBytes") == 0) {
+    std::vector<uint8_t> imageBytes;
+    auto operationResult = SaveThumbnailToBytes(Utf16FromUtf8(*src_file).c_str(),
+                                                static_cast<int>(*width),
+                                                imageFormat,
+                                                &imageBytes);
+
+    if (operationResult == kGetThumbnailFailedExtraction) {
+      result->Success(flutter::EncodableValue());
+    } else if (operationResult != "") {
+      result->Error("PluginError", "Operation failed. " + operationResult);
+    } else {
+      result->Success(flutter::EncodableValue(imageBytes));
     }
   } else {
     result->NotImplemented();

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:fc_native_video_thumbnail/fc_native_video_thumbnail.dart';
@@ -5,14 +6,14 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:async';
-
-import 'package:tmp_path/tmp_path.dart';
 import 'package:path/path.dart' as p;
+import 'package:tmp_path/tmp_path.dart';
 
 void main() {
   runApp(const MyApp());
 }
+
+final _plugin = FcNativeVideoThumbnail();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -32,9 +33,13 @@ class Task {
   final int height;
   final bool? isSrcUri;
 
-  String? destFile;
-  String? destImgSize;
-  String? error;
+  String? outFile;
+  String? outFileDimensions;
+  String? outFileError;
+
+  Uint8List? outBytes;
+  String? outBytesDimensions;
+  String? outBytesError;
 
   Task(
       {required this.name,
@@ -44,10 +49,13 @@ class Task {
       this.isSrcUri});
 
   Future<void> run() async {
+    await Future.wait([_toFile(), _toBytes()]);
+  }
+
+  Future<void> _toFile() async {
     try {
-      var plugin = FcNativeVideoThumbnail();
       final destFile = tmpPath() + p.extension(srcFile);
-      await plugin.getVideoThumbnail(
+      await _plugin.saveThumbnailToFile(
           srcFile: srcFile,
           destFile: destFile,
           width: width,
@@ -57,15 +65,36 @@ class Task {
       if (await File(destFile).exists()) {
         var imageFile = File(destFile);
         var decodedImage =
-            await decodeImageFromList(imageFile.readAsBytesSync());
-        destImgSize =
+            await decodeImageFromList(await imageFile.readAsBytes());
+        outFileDimensions =
             'Decoded size: ${decodedImage.width}x${decodedImage.height}';
-        this.destFile = destFile;
+        outFile = destFile;
       } else {
-        error = 'No thumbnail extracted';
+        outFileError = 'No thumbnail extracted';
       }
     } catch (err) {
-      error = err.toString();
+      outFileError = err.toString();
+    }
+  }
+
+  Future<void> _toBytes() async {
+    try {
+      final bytes = await _plugin.saveThumbnailToBytes(
+          srcFile: srcFile,
+          width: width,
+          height: height,
+          srcFileUri: isSrcUri,
+          format: 'jpeg');
+      if (bytes != null) {
+        var decodedImage = await decodeImageFromList(bytes);
+        outBytesDimensions =
+            'Decoded size: ${decodedImage.width}x${decodedImage.height}';
+        outBytes = bytes;
+      } else {
+        outBytesError = 'No thumbnail extracted';
+      }
+    } catch (err) {
+      outBytesError = err.toString();
     }
   }
 }
@@ -91,39 +120,45 @@ class _MyHomeState extends State<MyHome> {
           padding: const EdgeInsets.all(10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 8,
             children: [
               if (Platform.isAndroid || Platform.isIOS) ...[
                 ElevatedButton(
                   onPressed: () => _selectVideo(true),
                   child: const Text('Select video from gallery'),
                 ),
-                const SizedBox(height: 8.0),
               ],
               ElevatedButton(
                 onPressed: () => _selectVideo(false),
                 child: const Text('Select video from file'),
               ),
-              const SizedBox(height: 8.0),
               ..._tasks.map((task) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 8,
                   children: [
-                    const SizedBox(height: 8.0),
                     Text('>>> ${task.name}',
                         style: const TextStyle(
                             fontSize: 16.0, fontWeight: FontWeight.bold)),
-                    if (task.error != null) ...[
-                      const SizedBox(height: 8.0),
-                      Text(task.error!,
+                    Text('Out file: ${task.outFile}'),
+                    if (task.outFileError != null) ...[
+                      Text(task.outFileError!,
                           style: const TextStyle(color: Colors.red)),
                     ],
-                    if (task.destFile != null) ...[
-                      const SizedBox(height: 8.0),
-                      Text('Dest image: ${task.destFile}'),
-                      const SizedBox(height: 8.0),
-                      Text(task.destImgSize ?? ''),
-                      const SizedBox(height: 8.0),
-                      Image(image: FileImage(File(task.destFile!))),
+                    if (task.outFile != null) ...[
+                      Text(task.outFileDimensions ?? ''),
+                      Image(image: FileImage(File(task.outFile!))),
+                    ],
+                    Text(
+                        'Out bytes: ${task.outBytes != null ? '${task.outBytes!.lengthInBytes} bytes' : 'null'}'),
+                    if (task.outBytesError != null) ...[
+                      Text(task.outBytesError!,
+                          style: const TextStyle(color: Colors.red)),
+                    ],
+                    if (task.outBytes != null) ...[
+                      Text(task.outBytesDimensions ?? ''),
+                      Image.memory(task.outBytes!),
                     ],
                   ],
                 );
