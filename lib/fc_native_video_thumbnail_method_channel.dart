@@ -19,8 +19,6 @@ class MethodChannelFcNativeVideoThumbnail
       String? format,
       bool? srcFileUri,
       int? quality}) async {
-    var formatValue =
-        format ?? (srcFile.toLowerCase().endsWith('.png') ? 'png' : 'jpeg');
     if (width <= 0 && height <= 0) {
       throw ArgumentError('Invalid width and height');
     }
@@ -30,7 +28,7 @@ class MethodChannelFcNativeVideoThumbnail
           'destFile': destFile,
           'width': width,
           'height': height,
-          'format': formatValue,
+          'format': _defaultFormat(format),
           'quality': quality,
         })) ??
         false;
@@ -44,8 +42,6 @@ class MethodChannelFcNativeVideoThumbnail
       String? format,
       bool? srcFileUri,
       int? quality}) {
-    var formatValue =
-        format ?? (srcFile.toLowerCase().endsWith('.png') ? 'png' : 'jpeg');
     if (width <= 0 && height <= 0) {
       throw ArgumentError('Invalid width and height');
     }
@@ -54,8 +50,12 @@ class MethodChannelFcNativeVideoThumbnail
       'srcFileUri': srcFileUri,
       'width': width,
       'height': height,
-      'format': formatValue,
+      'format': _defaultFormat(format),
       'quality': quality,
     });
+  }
+
+  String _defaultFormat(String? format) {
+    return format ?? 'jpeg';
   }
 }

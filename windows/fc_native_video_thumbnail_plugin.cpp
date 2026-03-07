@@ -264,11 +264,7 @@ void FcNativeVideoThumbnailPlugin::HandleMethodCall(
     result->Error("InvalidArguments", "width must be an int in the range (0, INT_MAX].");
     return;
   }
-
-  const auto* outType =
-      std::get_if<std::string>(ValueOrNull(args, "format"));
-  const auto& imageFormat =
-      outType && outType->compare("png") == 0 ? Gdiplus::ImageFormatPNG : Gdiplus::ImageFormatJPEG;
+  const auto& imageFormat = Gdiplus::ImageFormatJPEG;
 
   if (methodName.compare("saveThumbnailToFile") == 0) {
     const auto* dest_file =
