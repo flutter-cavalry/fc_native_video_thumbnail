@@ -63,24 +63,29 @@ class FcNativeVideoThumbnailPlugin: FlutterPlugin, MethodCallHandler {
 
         var bitmap: Bitmap?
         var scaled = false
-        if (srcFileUri) {
-          val mmr = MediaMetadataRetriever()
-          mmr.setDataSource(mContext, Uri.parse(srcFile))
-          if (Build.VERSION.SDK_INT >= 27) {
-            bitmap = mmr.getScaledFrameAtTime(-1, OPTION_CLOSEST_SYNC, width, height)
+        try {
+          if (srcFileUri) {
+            val mmr = MediaMetadataRetriever()
+            mmr.setDataSource(mContext, Uri.parse(srcFile))
+            if (Build.VERSION.SDK_INT >= 27) {
+              bitmap = mmr.getScaledFrameAtTime(-1, OPTION_CLOSEST_SYNC, width, height)
+              scaled = true
+            } else {
+              bitmap = mmr.frameAtTime
+            }
+          } else if (Build.VERSION.SDK_INT >= 29) {
+            bitmap =
+              ThumbnailUtils.createVideoThumbnail(File(srcFile), Size(width, height), null)
             scaled = true
           } else {
-            bitmap = mmr.frameAtTime
+            bitmap = ThumbnailUtils.createVideoThumbnail(
+              srcFile,
+              MediaStore.Images.Thumbnails.MINI_KIND
+            )
           }
-        } else if (Build.VERSION.SDK_INT >= 29) {
-          bitmap =
-            ThumbnailUtils.createVideoThumbnail(File(srcFile), Size(width, height), null)
-          scaled = true
-        } else {
-          bitmap = ThumbnailUtils.createVideoThumbnail(
-            srcFile,
-            MediaStore.Images.Thumbnails.MINI_KIND
-          )
+        } catch (err: Exception) {
+          // If we fail to retrieve the thumbnail, we return null or false instead of throwing an error.
+          bitmap = null
         }
 
         if (bitmap == null) {

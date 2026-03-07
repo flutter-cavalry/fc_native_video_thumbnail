@@ -7,8 +7,8 @@ class FcNativeVideoThumbnail {
   ///
   /// [srcFile] source video path or Uri (See [srcFileUri]).
   /// [srcFileUri] If true, [srcFile] is a Uri (Android/iOS/macOS only).
-  /// [destFile] destination thumbnail path.
-  /// [width] / [height] max dimensions of the destination thumbnail.
+  /// [destFile] thumbnail save path.
+  /// [width] / [height] max dimensions of the thumbnail image.
   ///   Windows doesn't support non-square thumbnail images, only [width] is used in Windows, resulting in a [width]x[width] max thumbnail.
   /// [format] only "jpeg" is supported. Defaults to "jpeg".
   /// [quality] a fallback value for the quality of the thumbnail image (0-100). May be ignored by the platform.
@@ -45,8 +45,8 @@ class FcNativeVideoThumbnail {
   ///
   /// [srcFile] source video path or Uri (See [srcFileUri]).
   /// [srcFileUri] If true, [srcFile] is a Uri (Android/iOS/macOS only).
-  /// [width] / [height] max dimensions of the destination thumbnail.
-  /// Windows doesn't support non-square thumbnail images, only [width] is used in Windows, resulting in a [width]x[width] max thumbnail.
+  /// [width] / [height] max dimensions of the thumbnail image.
+  ///   Windows doesn't support non-square thumbnail images, only [width] is used in Windows, resulting in a [width]x[width] max thumbnail.
   /// [format] only "jpeg" is supported. Defaults to "jpeg".
   /// [quality] a fallback value for the quality of the thumbnail image (0-100). May be ignored by the platform.
   /// [at] the time position of the thumbnail in seconds.
