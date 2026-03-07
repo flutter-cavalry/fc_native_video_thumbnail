@@ -13,8 +13,7 @@ class FcNativeVideoThumbnail {
   /// [format] only "jpeg" is supported. Defaults to "jpeg".
   /// [quality] a fallback value for the quality of the thumbnail image (0-100). May be ignored by the platform.
   /// [at] the time position of the thumbnail.
-  ///   Defaults to 1 on iOS/macOS.
-  ///   Ignored on Windows.
+  ///   Not supported on Windows, or Android if source file is a path.
   ///
   /// Returns true if thumbnail was successfully created. Or false if thumbnail is not available.
   /// Throws if error happens during thumbnail generation.
@@ -50,8 +49,7 @@ class FcNativeVideoThumbnail {
   /// [format] only "jpeg" is supported. Defaults to "jpeg".
   /// [quality] a fallback value for the quality of the thumbnail image (0-100). May be ignored by the platform.
   /// [at] the time position of the thumbnail.
-  ///   Defaults to 1 on iOS/macOS.
-  ///   Ignored on Windows.
+  ///   Not supported on Windows, or Android if source file is a path.
   ///
   /// Returns the thumbnail as bytes if successfully created. Or null if thumbnail is not available.
   /// Throws if error happens during thumbnail generation.

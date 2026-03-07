@@ -36,26 +36,45 @@ try {
   ///   Windows doesn't support non-square thumbnail images, only [width] is used in Windows, resulting in a [width]x[width] max thumbnail.
   /// [format] only "jpeg" is supported. Defaults to "jpeg".
   /// [quality] a fallback value for the quality of the thumbnail image (0-100). May be ignored by the platform.
-  /// [at] the time position of the thumbnail in seconds.
-  ///   Defaults to 1 on iOS/macOS.
-  ///   Ignored on Windows/Android.
+  /// [at] the time position of the thumbnail.
+  ///   Not supported on Windows, or Android if source file is a path.
   final generated = await plugin.saveThumbnailToFile(
             srcFile: srcFile,
             destFile: destFile,
             width: 300,
             height: 300,
-            format: 'jpeg',
-            quality: 90,
-            at: 1);
+            quality: 90);
 
   // `saveThumbnailToBytes` has the same options as `saveThumbnailToFile` except `destFile`.
   final thumbnailBytes = await plugin.saveThumbnailToBytes(
             srcFile: srcFile,
             width: 300,
             height: 300,
-            format: 'jpeg',
             quality: 90);
 } catch (err) {
   // Handle platform errors.
 }
+```
+
+### Seeking to a specific time position
+
+Note that seeking is not supported in the following cases:
+
+- Windows
+- Android if source file is a path (not a Uri)
+
+```dart
+await plugin.saveThumbnailToFile(
+            srcFile: srcFile,
+            destFile: destFile,
+            width: 300,
+            height: 300,
+            quality: 90,
+            // Seek to 13 seconds to create the thumbnail.
+            at: FcVideoThumbnailTime(13, .seconds),
+// Supported units:
+// .seconds
+// .milliseconds
+// .microseconds
+);
 ```

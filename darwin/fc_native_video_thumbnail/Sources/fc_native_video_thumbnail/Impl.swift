@@ -13,7 +13,7 @@ import UniformTypeIdentifiers
 private func _generateThumbnailCGImage(
   from url: URL,
   maxSize: CGSize,
-  atSeconds seconds: Double
+  atUs: Int64?
 ) throws -> CGImage? {
 
   let asset = AVAsset(url: url)
@@ -29,8 +29,8 @@ private func _generateThumbnailCGImage(
   generator.requestedTimeToleranceBefore = .zero
   generator.requestedTimeToleranceAfter = .zero
 
-  let time = CMTime(seconds: seconds, preferredTimescale: 600)
-
+  // Default to 1 second if atUs is not provided
+  let time = CMTimeMake(value: atUs ?? 1_000_000, timescale: 1_000_000)
   return try generator.copyCGImage(at: time, actualTime: nil)
 }
 
@@ -85,14 +85,14 @@ private func encodeJPEG(
 public func generateThumbnail(
   from url: URL,
   maxSize: CGSize,
-  atSeconds seconds: Double = 1.0
+  atUs: Int64?
 ) throws -> PlatformImage? {
 
   guard
     let cgImage = try _generateThumbnailCGImage(
       from: url,
       maxSize: maxSize,
-      atSeconds: seconds
+      atUs: atUs
     )
   else {
     return nil
@@ -109,7 +109,7 @@ public func saveThumbnail(
   from url: URL,
   to outputURL: URL,
   maxSize: CGSize,
-  atSeconds seconds: Double = 1.0,
+  atUs: Int64?,
   compressionQuality: Double = 0.9
 ) throws -> Bool {
 
@@ -117,7 +117,7 @@ public func saveThumbnail(
     let cgImage = try _generateThumbnailCGImage(
       from: url,
       maxSize: maxSize,
-      atSeconds: seconds
+      atUs: atUs
     )
   else {
     return false
@@ -139,7 +139,7 @@ public func saveThumbnail(
 public func thumbnailData(
   from url: URL,
   maxSize: CGSize,
-  atSeconds seconds: Double = 1.0,
+  atUs: Int64?,
   compressionQuality: Double = 0.9
 ) throws -> Data? {
 
@@ -147,7 +147,7 @@ public func thumbnailData(
     let cgImage = try _generateThumbnailCGImage(
       from: url,
       maxSize: maxSize,
-      atSeconds: seconds
+      atUs: atUs
     )
   else {
     return nil

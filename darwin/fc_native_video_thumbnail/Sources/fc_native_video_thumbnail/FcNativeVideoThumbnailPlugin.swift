@@ -33,7 +33,7 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
       let height = args["height"] as! Int
       let srcUri = args["srcFileUri"] as? Bool ?? false
       let quality = args["quality"] as? Int
-      let atSeconds = args["atSeconds"] as? Double ?? 1.0
+      let atUs = args["atUs"] as? Int64
       let qualityDouble = quality != nil ? Double(quality!) / 100.0 : 0.9
 
       guard let srcUrl = srcUri ? URL(string: srcFile) : URL(fileURLWithPath: srcFile) else {
@@ -48,7 +48,7 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
             from: srcUrl,
             to: destUrl,
             maxSize: CGSize(width: width, height: height),
-            atSeconds: atSeconds,
+            atUs: atUs,
             compressionQuality: qualityDouble
           )
 
@@ -69,7 +69,7 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
       let height = args["height"] as! Int
       let srcUri = args["srcFileUri"] as? Bool ?? false
       let quality = args["quality"] as? Int
-      let atSeconds = args["atSeconds"] as? Double ?? 1.0
+      let atUs = args["atUs"] as? Int64
       let qualityDouble = quality != nil ? Double(quality!) / 100.0 : 0.9
 
       guard let srcUrl = srcUri ? URL(string: srcFile) : URL(fileURLWithPath: srcFile) else {
@@ -82,7 +82,7 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
           let generated = try thumbnailData(
             from: srcUrl,
             maxSize: CGSize(width: width, height: height),
-            atSeconds: atSeconds,
+            atUs: atUs,
             compressionQuality: qualityDouble
           )
 

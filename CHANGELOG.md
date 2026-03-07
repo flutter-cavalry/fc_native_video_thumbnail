@@ -1,3 +1,7 @@
+## 2.1.0
+
+- Seeking support on more platforms
+
 ## 2.0.0
 
 - **Breaking**: we now have 2 APIs:
