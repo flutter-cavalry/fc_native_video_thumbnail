@@ -4,13 +4,15 @@
 
 A Flutter plugin to create video thumbnails via native APIs.
 
-|               | iOS | Android | macOS | Windows |
-| ------------- | --- | ------- | ----- | ------- |
-| Source (Path) | ✅  | ✅      | ✅    | ✅      |
-| Source (Uri)  | ✅  | ✅      | ✅    | -       |
-| Seeking       | ✅  | ⚠️      | ✅    | -       |
+|               | iOS | Android | macOS | Windows | Linux |
+| ------------- | --- | ------- | ----- | ------- | ----- |
+| Source (Path) | ✅  | ✅      | ✅    | ✅      | ✅    |
+| Source (Uri)  | ✅  | ✅      | ✅    | -       | -     |
+| Seeking       | ✅  | ⚠️      | ✅    | -       | ✅    |
 
 ⚠️ Android seeking is only supported when the source file is a Uri.
+
+Linux requires `libavformat`, `libavcodec`, `libavutil`, `libswscale` (FFmpeg) and `libjpeg` installed on the system.
 
 ## Usage
 
