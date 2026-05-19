@@ -58,7 +58,7 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
         } catch {
           DispatchQueue.main.async {
             result(
-              FlutterError(code: "PluginError", message: error.localizedDescription, details: nil)
+              FlutterError(code: "PluginError", message: "\(error)", details: nil)
             )
           }
         }
@@ -92,7 +92,7 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
         } catch {
           DispatchQueue.main.async {
             result(
-              FlutterError(code: "PluginError", message: error.localizedDescription, details: nil)
+              FlutterError(code: "PluginError", message: "\(error)", details: nil)
             )
           }
         }
