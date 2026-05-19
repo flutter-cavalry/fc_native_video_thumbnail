@@ -15,7 +15,6 @@ private func _generateThumbnailCGImage(
   maxSize: CGSize,
   atUs: Int64?
 ) throws -> CGImage? {
-
   let asset = AVAsset(url: url)
 
   guard asset.tracks(withMediaType: .video).count > 0 else {
@@ -29,8 +28,7 @@ private func _generateThumbnailCGImage(
   generator.requestedTimeToleranceBefore = .zero
   generator.requestedTimeToleranceAfter = .zero
 
-  // Default to 1 second if atUs is not provided
-  let time = CMTimeMake(value: atUs ?? 1_000_000, timescale: 1_000_000)
+  let time = CMTimeMake(value: atUs ?? 0, timescale: 1_000_000)
   return try generator.copyCGImage(at: time, actualTime: nil)
 }
 
