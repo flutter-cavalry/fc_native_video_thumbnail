@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fc_native_video_thumbnail/fc_native_video_thumbnail.dart';
+import 'package:fc_native_video_thumbnail/fc_native_video_thumbnail_platform_interface.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,10 +37,12 @@ class Task {
   String? outFile;
   String? outFileDimensions;
   String? outFileError;
+  Duration? outFileTime;
 
   Uint8List? outBytes;
   String? outBytesDimensions;
   String? outBytesError;
+  Duration? outBytesTime;
 
   Task({
     required this.name,
@@ -54,6 +57,7 @@ class Task {
   }
 
   Future<void> _toFile() async {
+    final sw = Stopwatch()..start();
     try {
       final destFile = tmpPath() + p.extension(srcFile);
       await _plugin.saveThumbnailToFile(
@@ -77,10 +81,14 @@ class Task {
       }
     } catch (err) {
       outFileError = err.toString();
+    } finally {
+      sw.stop();
+      outFileTime = sw.elapsed;
     }
   }
 
   Future<void> _toBytes() async {
+    final sw = Stopwatch()..start();
     try {
       final bytes = await _plugin.saveThumbnailToBytes(
         srcFile: srcFile,
@@ -99,6 +107,9 @@ class Task {
       }
     } catch (err) {
       outBytesError = err.toString();
+    } finally {
+      sw.stop();
+      outBytesTime = sw.elapsed;
     }
   }
 }
@@ -114,6 +125,14 @@ enum _VideoSrc { gallery, files, uri }
 
 class _MyHomeState extends State<MyHome> {
   final _tasks = <Task>[];
+  String? _selectedVideoPath;
+  bool? _isSrcUri;
+  double _seekPosition = 0.0;
+  double _maxDuration = 60.0;
+  Timer? _debounceTimer;
+  Uint8List? _seekThumbnail;
+  String? _seekThumbnailError;
+  bool _seeking = false;
 
   @override
   Widget build(BuildContext context) {
@@ -142,6 +161,44 @@ class _MyHomeState extends State<MyHome> {
                   onPressed: () => _selectVideo(.uri),
                   child: const Text('Select video from SAF (URI)'),
                 ),
+              if (!Platform.isWindows && _selectedVideoPath != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Seek to: ${_seekPosition.toStringAsFixed(1)}s',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Slider(
+                  value: _seekPosition,
+                  min: 0,
+                  max: _maxDuration,
+                  divisions: _maxDuration.toInt() * 10,
+                  label: '${_seekPosition.toStringAsFixed(1)}s',
+                  onChanged: (value) {
+                    setState(() {
+                      _seekPosition = value;
+                    });
+                    _debounceTimer?.cancel();
+                    _debounceTimer = Timer(const Duration(milliseconds: 100), () {
+                      _generateSeekThumbnail();
+                    });
+                  },
+                ),
+                if (_seeking)
+                  const SizedBox(
+                    width: 300,
+                    height: 200,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                if (_seekThumbnail != null)
+                  SizedBox(
+                    width: 300,
+                    height: 200,
+                    child: Image.memory(_seekThumbnail!),
+                  ),
+                if (_seekThumbnailError != null)
+                  Text(_seekThumbnailError!, style: const TextStyle(color: Colors.red)),
+              ],
+              const SizedBox(height: 8),
               ..._tasks.map((task) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,6 +213,8 @@ class _MyHomeState extends State<MyHome> {
                       ),
                     ),
                     Text('Out file: ${task.outFile}'),
+                    if (task.outFileTime != null)
+                      Text('Time: ${task.outFileTime!.inMilliseconds}ms'),
                     if (task.outFileError != null) ...[
                       Text(
                         task.outFileError!,
@@ -169,6 +228,8 @@ class _MyHomeState extends State<MyHome> {
                     Text(
                       'Out bytes: ${task.outBytes != null ? '${task.outBytes!.lengthInBytes} bytes' : 'null'}',
                     ),
+                    if (task.outBytesTime != null)
+                      Text('Time: ${task.outBytesTime!.inMilliseconds}ms'),
                     if (task.outBytesError != null) ...[
                       Text(
                         task.outBytesError!,
@@ -220,6 +281,11 @@ class _MyHomeState extends State<MyHome> {
 
       setState(() {
         _tasks.clear();
+        _selectedVideoPath = srcPath;
+        _isSrcUri = src == _VideoSrc.uri ? true : null;
+        _seekPosition = 0.0;
+        _seekThumbnail = null;
+        _seekThumbnailError = null;
       });
 
       final smallVidBytes = await rootBundle.load('res/a.mp4');
@@ -255,6 +321,44 @@ class _MyHomeState extends State<MyHome> {
         return;
       }
       await _showErrorAlert(context, err.toString());
+    }
+  }
+
+  Future<void> _generateSeekThumbnail() async {
+    if (_selectedVideoPath == null) return;
+    setState(() {
+      _seeking = true;
+      _seekThumbnail = null;
+      _seekThumbnailError = null;
+    });
+    try {
+      final bytes = await _plugin.saveThumbnailToBytes(
+        srcFile: _selectedVideoPath!,
+        width: 300,
+        height: 300,
+        srcFileUri: _isSrcUri,
+        at: FcVideoThumbnailTime(
+          (_seekPosition * 1e6).toInt(),
+          FcVideoThumbnailTimeUnit.microseconds,
+        ),
+      );
+      if (bytes != null) {
+        setState(() {
+          _seekThumbnail = bytes;
+        });
+      } else {
+        setState(() {
+          _seekThumbnailError = 'No thumbnail at this position';
+        });
+      }
+    } catch (err) {
+      setState(() {
+        _seekThumbnailError = err.toString();
+      });
+    } finally {
+      setState(() {
+        _seeking = false;
+      });
     }
   }
 
