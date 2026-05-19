@@ -1,3 +1,8 @@
+## 2.2.0
+
+- Add linux support (thanks to [nulkode](https://github.com/nulkode)).
+- Remove the default 1.0 sec seek time on macOS and iOS.
+
 ## 2.1.0
 
 - Seeking support on more platforms

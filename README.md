@@ -16,8 +16,6 @@ Linux requires `libavformat`, `libavcodec`, `libavutil`, `libswscale` (FFmpeg) a
 
 ## Usage
 
-There are 2 APIs:
-
 - `saveThumbnailToFile` saves the thumbnail to a file path.
   - Returns true if thumbnail was successfully created. Or false if thumbnail is not available.
   - Throws if error happens during thumbnail generation.
