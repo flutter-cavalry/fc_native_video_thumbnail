@@ -1,4 +1,4 @@
-## Unreleased
+## 4.0.0
 
 - **Breaking**: Raise the minimum deployment targets to iOS 16 and macOS 13, and make the public Swift thumbnail helpers asynchronous.
 - Fix Android filesystem-path sources and resize thumbnails that exceed either requested dimension.
