@@ -14,10 +14,11 @@ private func _generateThumbnailCGImage(
   from url: URL,
   maxSize: CGSize,
   atUs: Int64?
-) throws -> CGImage? {
+) async throws -> CGImage? {
   let asset = AVAsset(url: url)
 
-  guard asset.tracks(withMediaType: .video).count > 0 else {
+  let videoTracks = try await asset.loadTracks(withMediaType: .video)
+  guard !videoTracks.isEmpty else {
     return nil
   }
 
@@ -29,7 +30,7 @@ private func _generateThumbnailCGImage(
   generator.requestedTimeToleranceAfter = .zero
 
   let time = CMTimeMake(value: atUs ?? 0, timescale: 1_000_000)
-  return try generator.copyCGImage(at: time, actualTime: nil)
+  return try await generator.image(at: time).image
 }
 
 private func encodeJPEG(
@@ -84,10 +85,10 @@ public func generateThumbnail(
   from url: URL,
   maxSize: CGSize,
   atUs: Int64?
-) throws -> PlatformImage? {
+) async throws -> PlatformImage? {
 
   guard
-    let cgImage = try _generateThumbnailCGImage(
+    let cgImage = try await _generateThumbnailCGImage(
       from: url,
       maxSize: maxSize,
       atUs: atUs
@@ -109,10 +110,10 @@ public func saveThumbnail(
   maxSize: CGSize,
   atUs: Int64?,
   compressionQuality: Double = 0.9
-) throws -> Bool {
+) async throws -> Bool {
 
   guard
-    let cgImage = try _generateThumbnailCGImage(
+    let cgImage = try await _generateThumbnailCGImage(
       from: url,
       maxSize: maxSize,
       atUs: atUs
@@ -139,10 +140,10 @@ public func thumbnailData(
   maxSize: CGSize,
   atUs: Int64?,
   compressionQuality: Double = 0.9
-) throws -> Data? {
+) async throws -> Data? {
 
   guard
-    let cgImage = try _generateThumbnailCGImage(
+    let cgImage = try await _generateThumbnailCGImage(
       from: url,
       maxSize: maxSize,
       atUs: atUs

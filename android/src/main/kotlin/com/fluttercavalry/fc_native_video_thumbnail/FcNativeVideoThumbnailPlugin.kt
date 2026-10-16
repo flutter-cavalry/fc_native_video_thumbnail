@@ -75,7 +75,7 @@ class FcNativeVideoThumbnailPlugin :
                     if (srcFileUri) {
                         mmr.setDataSource(mContext, srcFile.toUri())
                     } else {
-                        mmr.setDataSource(mContext, srcFile.toUri())
+                        mmr.setDataSource(srcFile)
                     }
                     val fullSize = getVideoDisplaySize(mmr)
                     var newSize = fullSize ?: Pair(width, height)
@@ -112,19 +112,23 @@ class FcNativeVideoThumbnailPlugin :
                 val oldHeight = bitmap.height
 
                 // In older Android versions, the retrieved thumbnail may not be scaled to the requested size, so we need to scale it ourselves.
-                if (!scaled && oldWidth != width && oldHeight != height) {
+                if (!scaled && (oldWidth > width || oldHeight > height)) {
                     val newSize = sizeToFit(oldWidth, oldHeight, width, height)
                     bitmap = Bitmap.createScaledBitmap(bitmap, newSize.first, newSize.second, true)
                 }
                 if (saveToBytes) {
                     val output = ByteArrayOutputStream()
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, quality, output)
+                    check(bitmap.compress(Bitmap.CompressFormat.JPEG, quality, output)) {
+                        "Failed to encode thumbnail"
+                    }
                     launch(Dispatchers.Main) {
                         result.success(output.toByteArray())
                     }
                 } else {
                     FileOutputStream(destFile).use { out ->
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, out)
+                        check(bitmap.compress(Bitmap.CompressFormat.JPEG, quality, out)) {
+                            "Failed to encode thumbnail"
+                        }
                     }
                     launch(Dispatchers.Main) {
                         result.success(true)

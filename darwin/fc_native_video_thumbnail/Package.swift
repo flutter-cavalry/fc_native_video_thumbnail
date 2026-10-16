@@ -6,8 +6,8 @@ import PackageDescription
 let package = Package(
     name: "fc_native_video_thumbnail",
     platforms: [
-        .iOS("14.0"),
-        .macOS("11.0"),
+        .iOS("16.0"),
+        .macOS("13.0"),
     ],
     products: [
         .library(name: "fc-native-video-thumbnail", targets: ["fc_native_video_thumbnail"])

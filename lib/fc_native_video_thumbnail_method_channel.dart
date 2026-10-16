@@ -11,16 +11,17 @@ class MethodChannelFcNativeVideoThumbnail
   final methodChannel = const MethodChannel('fc_native_video_thumbnail');
 
   @override
-  Future<bool> saveThumbnailToFile(
-      {required String srcFile,
-      required String destFile,
-      required int width,
-      required int height,
-      String? format,
-      bool? srcFileUri,
-      FcVideoThumbnailTime? at,
-      int? quality}) async {
-    if (width <= 0 && height <= 0) {
+  Future<bool> saveThumbnailToFile({
+    required String srcFile,
+    required String destFile,
+    required int width,
+    required int height,
+    String? format,
+    bool? srcFileUri,
+    FcVideoThumbnailTime? at,
+    int? quality,
+  }) async {
+    if (width <= 0 || height <= 0) {
       throw ArgumentError('Invalid width and height');
     }
     return (await methodChannel.invokeMethod<bool?>('saveThumbnailToFile', {
@@ -37,15 +38,16 @@ class MethodChannelFcNativeVideoThumbnail
   }
 
   @override
-  Future<Uint8List?> saveThumbnailToBytes(
-      {required String srcFile,
-      required int width,
-      required int height,
-      String? format,
-      bool? srcFileUri,
-      FcVideoThumbnailTime? at,
-      int? quality}) {
-    if (width <= 0 && height <= 0) {
+  Future<Uint8List?> saveThumbnailToBytes({
+    required String srcFile,
+    required int width,
+    required int height,
+    String? format,
+    bool? srcFileUri,
+    FcVideoThumbnailTime? at,
+    int? quality,
+  }) {
+    if (width <= 0 || height <= 0) {
       throw ArgumentError('Invalid width and height');
     }
     return methodChannel.invokeMethod<Uint8List?>('saveThumbnailToBytes', {

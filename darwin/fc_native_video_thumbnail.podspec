@@ -16,8 +16,8 @@ A new Flutter plugin project.
   s.source_files = 'fc_native_video_thumbnail/Sources/fc_native_video_thumbnail/**/*'
 
   # Set the deployment targets for both iOS and macOS.
-  s.ios.deployment_target = '14.0'
-  s.osx.deployment_target = '11.0'
+  s.ios.deployment_target = '16.0'
+  s.osx.deployment_target = '13.0'
 
   # Define the platform-specific dependencies.
   s.ios.dependency 'Flutter'

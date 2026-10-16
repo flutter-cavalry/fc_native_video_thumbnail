@@ -20,6 +20,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <vector>
 
 const std::string kGetThumbnailFailedExtraction = "Failed extraction";
@@ -274,32 +275,53 @@ void FcNativeVideoThumbnailPlugin::HandleMethodCall(
       return;
     }
 
-    auto operationResult = SaveThumbnailToFile(Utf16FromUtf8(*src_file).c_str(),
-                                               Utf16FromUtf8(*dest_file).c_str(),
-                                               static_cast<int>(*width),
-                                               imageFormat);
+    const auto src_path = Utf16FromUtf8(*src_file);
+    const auto dest_path = Utf16FromUtf8(*dest_file);
+    const int requested_size = static_cast<int>(*width);
+    std::thread([src_path, dest_path, requested_size, imageFormat,
+                 result = std::move(result)]() mutable {
+      const HRESULT com_result = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+      if (FAILED(com_result)) {
+        result->Error("PluginError", "Failed to initialize COM for thumbnail extraction.");
+        return;
+      }
 
-    if (operationResult == kGetThumbnailFailedExtraction) {
-      result->Success(flutter::EncodableValue(false));
-    } else if (operationResult != "") {
-      result->Error("PluginError", "Operation failed. " + operationResult);
-    } else {
-      result->Success(flutter::EncodableValue(true));
-    }
+      const auto operationResult = SaveThumbnailToFile(
+          src_path.c_str(), dest_path.c_str(), requested_size, imageFormat);
+      CoUninitialize();
+
+      if (operationResult == kGetThumbnailFailedExtraction) {
+        result->Success(flutter::EncodableValue(false));
+      } else if (operationResult != "") {
+        result->Error("PluginError", "Operation failed. " + operationResult);
+      } else {
+        result->Success(flutter::EncodableValue(true));
+      }
+    }).detach();
   } else if (methodName.compare("saveThumbnailToBytes") == 0) {
-    std::vector<uint8_t> imageBytes;
-    auto operationResult = SaveThumbnailToBytes(Utf16FromUtf8(*src_file).c_str(),
-                                                static_cast<int>(*width),
-                                                imageFormat,
-                                                &imageBytes);
+    const auto src_path = Utf16FromUtf8(*src_file);
+    const int requested_size = static_cast<int>(*width);
+    std::thread([src_path, requested_size, imageFormat,
+                 result = std::move(result)]() mutable {
+      const HRESULT com_result = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+      if (FAILED(com_result)) {
+        result->Error("PluginError", "Failed to initialize COM for thumbnail extraction.");
+        return;
+      }
 
-    if (operationResult == kGetThumbnailFailedExtraction) {
-      result->Success(flutter::EncodableValue());
-    } else if (operationResult != "") {
-      result->Error("PluginError", "Operation failed. " + operationResult);
-    } else {
-      result->Success(flutter::EncodableValue(imageBytes));
-    }
+      std::vector<uint8_t> imageBytes;
+      const auto operationResult = SaveThumbnailToBytes(
+          src_path.c_str(), requested_size, imageFormat, &imageBytes);
+      CoUninitialize();
+
+      if (operationResult == kGetThumbnailFailedExtraction) {
+        result->Success(flutter::EncodableValue());
+      } else if (operationResult != "") {
+        result->Error("PluginError", "Operation failed. " + operationResult);
+      } else {
+        result->Success(flutter::EncodableValue(imageBytes));
+      }
+    }).detach();
   } else {
     result->NotImplemented();
   }

@@ -1,3 +1,12 @@
+## Unreleased
+
+- **Breaking**: Raise the minimum deployment targets to iOS 16 and macOS 13, and make the public Swift thumbnail helpers asynchronous.
+- Fix Android filesystem-path sources and resize thumbnails that exceed either requested dimension.
+- Return an error when Android cannot encode a thumbnail, and reject invalid dimensions consistently in Dart.
+- Use asynchronous AVFoundation APIs and validate native Apple method arguments.
+- Perform Windows thumbnail extraction on a worker thread.
+- Enable Android seeking for filesystem-path sources.
+
 ## 3.0.1
 
 - Update Swift package.

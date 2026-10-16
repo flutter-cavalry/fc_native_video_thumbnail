@@ -21,20 +21,26 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    guard let args = call.arguments as? [String: Any] else {
-      result(FlutterError(code: "InvalidArgsType", message: "Invalid args type", details: nil))
-      return
-    }
     switch call.method {
     case "saveThumbnailToFile":
-      let srcFile = args["srcFile"] as! String
-      let destFile = args["destFile"] as! String
-      let width = args["width"] as! Int
-      let height = args["height"] as! Int
+      guard
+        let args = call.arguments as? [String: Any],
+        let srcFile = args["srcFile"] as? String,
+        let destFile = args["destFile"] as? String,
+        let width = args["width"] as? Int,
+        let height = args["height"] as? Int,
+        width > 0,
+        height > 0
+      else {
+        result(
+          FlutterError(
+            code: "InvalidArguments", message: "Missing or invalid thumbnail arguments",
+            details: nil))
+        return
+      }
       let srcUri = args["srcFileUri"] as? Bool ?? false
-      let quality = args["quality"] as? Int
-      let atUs = args["atUs"] as? Int64
-      let qualityDouble = quality != nil ? Double(quality!) / 100.0 : 0.9
+      let quality = Double((args["quality"] as? Int) ?? 90) / 100.0
+      let atUs = (args["atUs"] as? NSNumber)?.int64Value
 
       guard let srcUrl = srcUri ? URL(string: srcFile) : URL(fileURLWithPath: srcFile) else {
         result(FlutterError(code: "PluginError", message: "Invalid source URL", details: nil))
@@ -42,14 +48,14 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
       }
       let destUrl = URL(fileURLWithPath: destFile)
 
-      DispatchQueue.global().async {
+      Task {
         do {
-          let generated = try saveThumbnail(
+          let generated = try await saveThumbnail(
             from: srcUrl,
             to: destUrl,
             maxSize: CGSize(width: width, height: height),
             atUs: atUs,
-            compressionQuality: qualityDouble
+            compressionQuality: quality
           )
 
           DispatchQueue.main.async {
@@ -64,26 +70,36 @@ public class FcNativeVideoThumbnailPlugin: NSObject, FlutterPlugin {
         }
       }
     case "saveThumbnailToBytes":
-      let srcFile = args["srcFile"] as! String
-      let width = args["width"] as! Int
-      let height = args["height"] as! Int
+      guard
+        let args = call.arguments as? [String: Any],
+        let srcFile = args["srcFile"] as? String,
+        let width = args["width"] as? Int,
+        let height = args["height"] as? Int,
+        width > 0,
+        height > 0
+      else {
+        result(
+          FlutterError(
+            code: "InvalidArguments", message: "Missing or invalid thumbnail arguments",
+            details: nil))
+        return
+      }
       let srcUri = args["srcFileUri"] as? Bool ?? false
-      let quality = args["quality"] as? Int
-      let atUs = args["atUs"] as? Int64
-      let qualityDouble = quality != nil ? Double(quality!) / 100.0 : 0.9
+      let quality = Double((args["quality"] as? Int) ?? 90) / 100.0
+      let atUs = (args["atUs"] as? NSNumber)?.int64Value
 
       guard let srcUrl = srcUri ? URL(string: srcFile) : URL(fileURLWithPath: srcFile) else {
         result(FlutterError(code: "PluginError", message: "Invalid source URL", details: nil))
         return
       }
 
-      DispatchQueue.global().async {
+      Task {
         do {
-          let generated = try thumbnailData(
+          let generated = try await thumbnailData(
             from: srcUrl,
             maxSize: CGSize(width: width, height: height),
             atUs: atUs,
-            compressionQuality: qualityDouble
+            compressionQuality: quality
           )
 
           DispatchQueue.main.async {

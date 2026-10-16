@@ -4,11 +4,7 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'fc_native_video_thumbnail_method_channel.dart';
 
-enum FcVideoThumbnailTimeUnit {
-  seconds,
-  milliseconds,
-  microseconds,
-}
+enum FcVideoThumbnailTimeUnit { seconds, milliseconds, microseconds }
 
 class FcVideoThumbnailTime {
   final int value;
@@ -28,16 +24,11 @@ class FcVideoThumbnailTime {
       case FcVideoThumbnailTimeUnit.microseconds:
         us = value;
         break;
-      default:
-        us = -1;
-        break;
     }
     if (us < 0) {
       return {};
     }
-    return {
-      'atUs': us,
-    };
+    return {'atUs': us};
   }
 }
 
@@ -63,27 +54,30 @@ abstract class FcNativeVideoThumbnailPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<bool> saveThumbnailToFile(
-      {required String srcFile,
-      required String destFile,
-      required int width,
-      required int height,
-      String? format,
-      bool? srcFileUri,
-      FcVideoThumbnailTime? at,
-      int? quality}) {
+  Future<bool> saveThumbnailToFile({
+    required String srcFile,
+    required String destFile,
+    required int width,
+    required int height,
+    String? format,
+    bool? srcFileUri,
+    FcVideoThumbnailTime? at,
+    int? quality,
+  }) {
     throw UnimplementedError('saveThumbnailToFile() has not been implemented.');
   }
 
-  Future<Uint8List?> saveThumbnailToBytes(
-      {required String srcFile,
-      required int width,
-      required int height,
-      String? format,
-      bool? srcFileUri,
-      FcVideoThumbnailTime? at,
-      int? quality}) {
+  Future<Uint8List?> saveThumbnailToBytes({
+    required String srcFile,
+    required int width,
+    required int height,
+    String? format,
+    bool? srcFileUri,
+    FcVideoThumbnailTime? at,
+    int? quality,
+  }) {
     throw UnimplementedError(
-        'saveThumbnailToBytes() has not been implemented.');
+      'saveThumbnailToBytes() has not been implemented.',
+    );
   }
 }
