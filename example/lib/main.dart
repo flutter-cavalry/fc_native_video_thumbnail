@@ -128,7 +128,7 @@ class _MyHomeState extends State<MyHome> {
   String? _selectedVideoPath;
   bool? _isSrcUri;
   double _seekPosition = 0.0;
-  double _maxDuration = 60.0;
+  final _maxDuration = 60.0;
   Timer? _debounceTimer;
   Uint8List? _seekThumbnail;
   String? _seekThumbnailError;
@@ -178,9 +178,12 @@ class _MyHomeState extends State<MyHome> {
                       _seekPosition = value;
                     });
                     _debounceTimer?.cancel();
-                    _debounceTimer = Timer(const Duration(milliseconds: 100), () {
-                      _generateSeekThumbnail();
-                    });
+                    _debounceTimer = Timer(
+                      const Duration(milliseconds: 100),
+                      () {
+                        _generateSeekThumbnail();
+                      },
+                    );
                   },
                 ),
                 if (_seeking)
@@ -196,7 +199,10 @@ class _MyHomeState extends State<MyHome> {
                     child: Image.memory(_seekThumbnail!),
                   ),
                 if (_seekThumbnailError != null)
-                  Text(_seekThumbnailError!, style: const TextStyle(color: Colors.red)),
+                  Text(
+                    _seekThumbnailError!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
               ],
               const SizedBox(height: 8),
               ..._tasks.map((task) {
